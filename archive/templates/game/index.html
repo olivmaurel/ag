@@ -1,0 +1,14 @@
+{% extends 'game/base.html' %}
+
+{% block content %}
+<h1>{{hello}}</h1>
+
+{{turn}}
+{% if debug %}
+  aaaaaaaaaaaaaa
+{% endif %}
+{% block turnform %}
+  {% include 'game/forms/turnform.html' %}
+{% endblock %}
+
+{% endblock %}

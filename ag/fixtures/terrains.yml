@@ -1,0 +1,37 @@
+terrain:
+  name: mountains
+terrain:
+  name: island
+terrain:
+  name: forest
+terrain:
+  name: plains
+terrain:
+  name: grasslands
+terrain:
+  name: steppe
+terrain:
+  name: archipelago
+terrain:
+  name: desert
+terrain:
+  name: hills
+
+    
+# Köppen climate classification
+climate:
+  name: continental
+climate:
+  name: alpine
+climate:
+  name: oceanic
+climate:
+  name: arid
+climate:
+  name: semi-arid
+climate:
+  name: subpolar
+climate:
+  name: tropical
+climate:
+  name: highland

@@ -1,0 +1,31 @@
+resource:
+  name: bamboo
+  terrain:
+    - mountains
+    - hills
+  climate:
+    - continental
+    - alpine
+
+resource:
+  name: deer
+  terrain:
+    - forest
+    - mountains
+  climate:
+    - continental
+    - highland
+    - oceanic
+  gives:
+    - meat
+    - bone
+    - skin
+
+resource:
+  name: salt
+  terrain:
+    - coast
+    - island
+  climate:
+    - oceanic
+    - temperate
