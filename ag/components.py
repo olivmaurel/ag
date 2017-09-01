@@ -64,18 +64,31 @@ class Health(Component):
 
 class Geo(Component):
 
-    defaults = dict([('coords', {'area': (0, 0), 'local': (0, 0)})])
+    defaults = dict([('loc', (0, 0))])
 
-    def __init__(self, e: Entity, *args, **kwargs) -> None:
+    def __init__(self, e: Entity, area: Entity=None, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
-        e.coords = self.coords
+        self.area = area
+        e.area = self.area
+        e.loc = self.loc
         e.enter_area = self.enter_area
 
+    def enter_area(self, area: Entity):
 
-    @staticmethod
-    def enter_area(e: Entity, area: Entity):
-        e.area = area
-        e.coords['area'] = area.coords['area']
+        if (self.entity.area):
+            self.entity.area.entities.discard(self.entity)
+
+        self.entity.area = area
+        self.area = area
+
+        area.entities.add(self.entity)
+
+    def enter_loc(self, loc: Tuple):
+
+        self.loc = loc
+        self.entity.loc = loc
+
+
 
 
 class Movement(Component):

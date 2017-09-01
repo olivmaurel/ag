@@ -2,7 +2,7 @@ from collections import OrderedDict
 from ag.ECS import Entity
 import ag.components
 from ag.systems import WorldSystem
-from typing import Any, Union, Dict
+from typing import Any, Union, Tuple
 
 class Factory(object):
 
@@ -35,19 +35,19 @@ class Factory(object):
         return self.make_entity(e, components)
 
     def make_area(self,
-                  geo: Dict,
+                  pos: Tuple,
                   terrain: str,
                   climate: str,
                   components: list=[]) -> Entity:
 
-        name = ('<Area {}:{}/{}>'.format(geo, terrain, climate))
-        components.extend([{'geo': [geo]},
-                           {'terrain': [terrain]},
+        name = ('<Area {}:{}/{}>'.format(pos, terrain, climate))
+        components.extend([{'terrain': [terrain]},
                            {'climate': [climate]}])
 
         area = self.make_entity(name, components)
         area.systems = []
-
+        area.entities = set()
+        area.pos = pos if isinstance(pos, tuple) else None
         return area
 
     def make_world_system(self, name: str=None) -> WorldSystem:
@@ -61,7 +61,7 @@ class Factory(object):
         _map = OrderedDict()  # type: OrderedDict[Any,Any]
         for x in range(x_axis):
             for y in range(y_axis):
-                area = self.make_area(geo={"area": (x, y)},
+                area = self.make_area(geo=((0, 0), (0, 0)),
                                       terrain='mountains',
                                       climate='tropical')
 
