@@ -1,7 +1,8 @@
 import math
 import itertools
 from collections import OrderedDict as dict
-from ag.ECS import Component
+from ag.ECS import Component, System, Entity
+from typing import Tuple
 
 
 class Hunger(Component):
@@ -10,7 +11,7 @@ class Hunger(Component):
     hungerscale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
 
     @property
-    def status(self):
+    def status(self) -> str:
         c = int(math.ceil(self.current / 25.0)) * 25
         return self.hungerscale[c]
 
@@ -21,7 +22,7 @@ class Thirst(Component):
     thirstscale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
 
     @property
-    def status(self):
+    def status(self) -> str:
         c = int(math.ceil(self.current / 25.0)) * 25
         return self.thirstscale[c]
 
@@ -57,27 +58,28 @@ class Health(Component):
     defaults = dict([('current', 100), ('max', 100)])
 
     @property
-    def alive(self):
+    def alive(self) -> bool:
         return self.current > 0
 
 
-class Position(Component):
+class Geo(Component):
 
-    def __init__(self, entity, x, y, area=None):
-        super().__init__(self)
-        self.area = area
-        self.x = x
-        self.y = y
+    defaults = dict([('coords', {'area': (0, 0), 'local': (0, 0)})])
+
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        e.coords = self.coords
+        e.enter_area = self.enter_area
+
+
+    @staticmethod
+    def enter_area(e: Entity, area: Entity):
+        e.area = area
+        e.coords['area'] = area.coords['area']
 
 
 class Movement(Component):
-
-    def enter_area(self, entity, area):
-        if self.entity.position:
-            self.entity.position.area = area
-        else:
-            raise ValueError ('{} has no position component'.format(self.entity.name))
-
+    pass
 
 class Terrain(Component):
 

@@ -27,7 +27,7 @@ class Component(object):
     __slots__ = ['entity']
 
     defaults = dict()
-    Catalog = dict()
+    Catalog = {} # type: dict
     ComponentTypes = dict()
 
     def __new__(cls, entity=None, **properties):

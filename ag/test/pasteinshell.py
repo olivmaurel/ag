@@ -1,32 +1,26 @@
-from ag.Factory import GameObjectFactory
+from ag.Factory import Factory
 from ag.components import *
-from ag.systems import BiologicalNeedsSystem
+from ag.systems import *
+from ag.ECS import *
 
-factory = GameObjectFactory()
+factory = Factory()
 
-w = factory.make_world('world', 4, 4)
-w.add_system(BiologicalNeedsSystem())
 
-player = factory.make_human('player')
-skeleton = factory.make_object('skeleton', components=[Health()])
+world = factory.make_world_system()
 
-active_area = w.map.grid[(0,0)][0]
+mountains = factory.make_area('mountain_range', 'mountains', 'alpine')
+island = factory.make_area('treasure island', 'island', 'tropical')
+
+assert island.active == False
+assert mountains.active == True
+
+e = factory.make_human('e')
+skeleton = factory.make_entity('skeleton', ['health'])
+
 
 for i in range(100):
-    w.update()
-    if not player.health.alive:
-        break
+    world.update()
 
-print(player.health.current)
-print(player.hunger.status)
-print(player.thirst.status)
-print(player.health.alive)
+assert e.health.alive == False
+assert skeleton.health.alive
 
-
-########
-
-from ag.ECS import *
-from ag.components import *
-
-e = Entity('area')
-t = Terrain(e, 'mountains')

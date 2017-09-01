@@ -20,7 +20,7 @@ class Entity(object):
     >>> print (e.fixtures)
     OrderedDict([('heart', 1)])
     """
-    Catalog = {}
+    Catalog = {} # type: dict
 
     __slots__ = ['uid', 'name', 'components']
 

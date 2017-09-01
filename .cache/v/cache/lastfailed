@@ -1,10 +1,17 @@
 {
-  "ag/test/test_components.py::TestComponents::()::test_component_becomes_attr_no_factory": true,
-  "ag/test/test_entity.py::TestEntities::()::test_create_entity_no_factory_no_binding": true,
+  "ag/test/test_area.py::TestArea::()::test_assign_area_to_entity": true,
+  "ag/test/test_area.py::TestArea::()::test_create_area": true,
+  "ag/test/test_area.py::TestArea::()::test_geo": true,
+  "ag/test/test_area.py::TestComponents::()::test_assign_area_to_entity": true,
+  "ag/test/test_area.py::TestComponents::()::test_create_area": true,
+  "ag/test/test_area.py::TestComponents::()::test_geo": true,
+  "ag/test/test_components.py::TestComponents::()::test_position": true,
+  "ag/test/test_entity.py::TestEntities::()::test_recreate_entity_different_components": true,
   "ag/test/test_entity.py::TestWorldCreation::()::test_basic_entity": true,
   "ag/test/test_entity.py::TestWorldCreation::()::test_create_two_entities_same_name": true,
   "ag/test/test_entity.py::TestWorldCreation::()::test_entities_must_be_different": true,
   "ag/test/test_simple.py::test_answer": true,
-  "ag/test/test_world_creation.py::TestWorldCreation::()::test_create_world_system": true,
+  "ag/test/test_systems.py::TestWorldCreation::()::test_systems_catalog_updates": true,
+  "ag/test/test_world_creation.py::TestWorldCreation::()::test_instantiate_world": true,
   "ag/test/test_world_creation.py::TestWorldCreation::()::test_two": true
 }

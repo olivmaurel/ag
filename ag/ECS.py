@@ -1,8 +1,8 @@
 from uuid import uuid4
-from collections import OrderedDict as dict
+from collections import OrderedDict
 from collections import defaultdict
 import json
-
+from typing import Any, List, DefaultDict
 
 class Entity(object):
     """
@@ -23,11 +23,11 @@ class Entity(object):
     >>> print (e.fixtures)
     OrderedDict([('heart', 1)])
     """
-    Catalog = {}
+    Catalog = OrderedDict() # type: OrderedDict[Any,Any]
 
     __slots__ = ['uid', 'name', 'components', 'conditions']
 
-    def __new__(cls, name=None, uid=None):
+    def __new__(cls, name: str=None, uid: str=None) -> Any:
         '''We only want one entity with the same name
         >>> player1 = Entity('player1')
         >>> player2 = Entity('player2')
@@ -47,33 +47,33 @@ class Entity(object):
     def __hash__(self):
         return hash(self.uid)
 
-    def __init__(self, name=None, uid=None):
+    def __init__(self, name=None, uid=None) -> None:
         self.uid = uuid4() if uid is None else uid
         self.name = name or ''
-        self.components = dict()
-        self.conditions = defaultdict(int)
+        self.components = OrderedDict()  # type: OrderedDict[Any,Any]
+        self.conditions = defaultdict(int)  # type: DefaultDict[int,Any]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         cname = self.__class__.__name__
         name = self.name or self.uid
         if name != self.uid:
             name = '{}:{}'.format(name, self.uid)
-        return  '<{} {}>'.format(cname, name)
+        return '<{} {}>'.format(cname, name)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
             return self.uid == other.uid
         elif isinstance(other, self.uid.__class__):
             return self.uid == other
         return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.components)
 
     def __getitem__(self, key):
         return self.components[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         self.components[key] = value
 
     def __getattr__(self, key, *args, **kwds):
@@ -87,7 +87,7 @@ class Entity(object):
             except KeyError:
                 return False
 
-    def __setattr__(self,key, value):
+    def __setattr__(self, key, value):
         '''Allows access to the properties/fixtures as an attribute'''
 
         if key in super(Entity, self).__getattribute__('__slots__'):
@@ -132,31 +132,29 @@ class Component:
 
     __slots__ = ['entity']
 
-    defaults = dict()
-    Catalog = dict()
-    ComponentTypes = dict()
+    defaults = OrderedDict()  # type: OrderedDict[Any,Any]
+    Catalog = OrderedDict()  # type: OrderedDict[Any,Any]
+    ComponentTypes = OrderedDict()  # type: OrderedDict[Any,Any]
 
-    def __new__(cls, entity=None, *args, **properties):
+    def __new__(cls, entity: Entity=None, *args: List, **properties: dict) -> Any:
         cname = cls.__name__
         if cname not in Component.ComponentTypes:
             Component.ComponentTypes[cname] = cls
-            cls.Catalog = dict()
+            cls.Catalog = OrderedDict()  # type: OrderedDict[Any,Any]
         if entity not in cls.Catalog:
             component = super().__new__(cls)
+            cls.Catalog[entity] = component
         else:
             component = cls.Catalog[entity]
         return component
 
-    def __init__(self, entity=None, *args, **properties):
-        """properties"""
+    def __init__(self, entity: str=None, *args: List, **properties: dict) -> None:
 
-        self.entity = entity if isinstance(entity,Entity) else None
-
-        if entity not in self.Catalog:
-            self.Catalog[entity] = self
-
-        for prop, val in self.defaults.items():
-            setattr(self, prop, properties.get(prop, val))
+        self.entity = entity
+        for prop_name, value in self.defaults.items():
+            if prop_name in properties.keys():
+                value = properties[prop_name]
+            setattr(self, prop_name, value)
 
     def __repr__(self):
         """<Component entity_id>"""
@@ -167,6 +165,7 @@ class Component:
                 if component == self:
                     entity_name = ' entity:{}.{}'.format(self.entity.name, prop_name)
                     break
+
         return '<{} : {}>'.format(cname, entity_name)
 
     def __str__(self):
@@ -190,6 +189,8 @@ class Component:
         '''Allows access to attributes as a dictionary'''
         return setattr(self, key, value)
 
+
+
     def restart(self):
         for prop_name, value in self.defaults.items():
             setattr(self, prop_name, value)
@@ -200,12 +201,14 @@ class System(object):
 
     System has a loose coupling with Components and Entities.
     '''
-    components = []
-    Catalog = {}
+    components = list() # type: List[str]
+    Catalog = OrderedDict()  # type: OrderedDict[Any,Any]
 
-    def __new__(cls, name=None, components=[]):
+    def __new__(cls, name: str=None, components: list=[]) -> Any:
         '''Add systems to the catalog'''
+
         name = cls.__name__ if name is None else name
+
         if name not in System.Catalog:
             system = super().__new__(cls)
             System.Catalog[name] = system
@@ -213,24 +216,25 @@ class System(object):
             system = System.Catalog[name]
         return system
 
-    def __init__(self, name=None, components=[]):
+    def __init__(self, name: str=None, components: list=[]) -> None:
+
         self.name = self.__class__.__name__ if name is None else name
         if components:
             self.components = components
 
-    def __repr__(self):
-        cname = self.__class__.__name__
-        return '<{} {}>'.format(cname, self.name)
+    def __repr__(self) -> str:
+
+        return '<{} : {}>'.format(self.__class__.__name__, self.components)
 
     @property
-    def entities(self):
+    def entities(self) -> list:
         ents = list(set(entity for component_cls in self.component_classes
                         for entity in component_cls.Catalog.keys()
                         if entity is not None))
         return ents
 
     @property
-    def component_classes(self):
+    def component_classes(self) -> list:
         return list(set(Component.ComponentTypes.get(component_name)
                         for component_name in self.components
                         if component_name in Component.ComponentTypes
@@ -239,7 +243,7 @@ class System(object):
     def get_components(self):
         '''Creates a dictionary of component classes'''
 
-    def update(self, dt=None):
+    def update(self):
         raise NotImplemented('update has not been implemented')
 
 

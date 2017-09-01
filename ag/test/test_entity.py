@@ -1,14 +1,14 @@
 import pytest
 import uuid
 from ag.ECS import Entity
-from ag.Factory import GameObjectFactory
+from ag.Factory import Factory
 from ag.components import *
 
 class TestEntities(object):
 
     @pytest.fixture
     def factory(self):
-        return GameObjectFactory()
+        return Factory()
 
     def test_basic_entity(self):
 
@@ -19,21 +19,21 @@ class TestEntities(object):
 
     def test_create_entity_no_factory_no_binding(self):
         skeleton = Entity('skeleton')
-        skeleton.health = Health()
+        skeleton.health = Health(skeleton)
         assert skeleton.health.entity == skeleton
 
     def test_create_entity_factory(self, factory):
-        lowercase = factory.make_object('lowercase', components=['health'])
+        lowercase = factory.make_entity('lowercase', components=['health'])
         assert lowercase.health.entity == lowercase
-        capitalize = factory.make_object('capitalize', components=['Health'])
+        capitalize = factory.make_entity('capitalize', components=['Health'])
         assert capitalize.health.entity == capitalize
-        in_dict_form = factory.make_object('in_dict_form', components=[{'Health': [100, 100]}])
+        in_dict_form = factory.make_entity('in_dict_form', components=[{'Health': [100, 100]}])
         assert in_dict_form.health.entity == in_dict_form
 
     def test_create_two_entities_same_name(self,factory):
 
-        skeleton = factory.make_object('skeleton', components=['health'])
-        skeletwo = factory.make_object('skeleton', components=['health'])
+        skeleton = factory.make_entity('skeleton', components=['health'])
+        skeletwo = factory.make_entity('skeleton', components=['health'])
         assert skeleton == skeletwo
 
     def test_create_two_entities_same_name_binding_entity(self):
@@ -46,6 +46,20 @@ class TestEntities(object):
 
     def test_entities_must_be_different(self, factory):
 
-        skeleton = factory.make_object('skeleton', components=['health'])
-        skeletwo = factory.make_object('skeletwo', components=['health'])
+        skeleton = factory.make_entity('skeleton', components=['health'])
+        skeletwo = factory.make_entity('skeletwo', components=['health'])
         assert skeleton != skeletwo
+
+    def test_recreate_entity(self, factory):
+
+        first = factory.make_entity('e')
+        second = factory.make_entity('e')
+        assert first == second
+
+    def test_recreate_entity_different_components(self, factory):
+
+        first = factory.make_entity('e', components=[{'Position': (0, 1)}])
+        second = factory.make_entity('e', components=['Health'])
+
+        assert 'position' not in second.components
+        assert 'health' in first.components
