@@ -89,10 +89,9 @@ class Geo(Component):
         self.entity.loc = loc
 
 
-
-
 class Movement(Component):
     pass
+
 
 class Terrain(Component):
 
@@ -100,6 +99,29 @@ class Terrain(Component):
 
     def dostuff(self):
         return 'Woooo!'
+
+
+class Inventory(Component):
+
+    default = dict([('capacity', 100), ('content', []), ('filled', 0)])
+
+    @property
+    def space_left(self):
+        return self.capacity - self.filled
+
+    def add(self, item):
+        if(item.size <= self.space_left):
+            self.content.append(item)
+            self.filled += item.size
+        else:
+            return False
+
+    def remove(self, item):
+        if(item in self.content):
+            self.content.pop(item)
+            self.filled -= item.size
+        else:
+            return False
 
 
 class Climate(Component):

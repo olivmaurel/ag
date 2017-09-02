@@ -3,6 +3,7 @@ from ag.ECS import Entity
 import ag.components
 from ag.systems import WorldSystem
 from typing import Any, Union, Tuple
+from uuid import uuid4
 
 class Factory(object):
 
@@ -13,10 +14,10 @@ class Factory(object):
         component = _c_class(entity, *args, **kwargs)
         entity.__setattr__(cname.lower(), component)
 
-    def make_entity(self, entity: Union[str, Entity], components: list=None) -> Entity:
+    def entity(self, entity: Union[str, Entity], components: list=None, uid: uuid4()=None) -> Entity:
 
         if isinstance(entity, str):
-            entity = Entity(entity)
+            entity = Entity(entity, uid)
         if components:
             for component in components:
                 if isinstance(component, dict):
@@ -27,28 +28,46 @@ class Factory(object):
 
         return entity
 
-    def make_human(self, name: str, uid: str=None):
+    def human(self, name: str, uid: str=None):
 
         e = Entity(name, uid)
         components = ['health', 'hunger', 'geo', 'thirst']
 
-        return self.make_entity(e, components)
+        return self.entity(e, components)
 
-    def make_area(self,
-                  pos: Tuple,
-                  terrain: str,
-                  climate: str,
-                  components: list=[]) -> Entity:
+    def area(self,
+             name: str,
+             pos: Tuple,
+             terrain: str,
+             climate: str,
+             components: list=[],
+             uid: uuid4()=None) -> Entity:
 
-        name = ('<Area {}:{}/{}>'.format(pos, terrain, climate))
+        name = ('<{} {}:{}/{}>'.format(name, pos, terrain, climate))
         components.extend([{'terrain': [terrain]},
                            {'climate': [climate]}])
 
-        area = self.make_entity(name, components)
+        area = self.entity(name, components, uid)
         area.systems = []
         area.entities = set()
         area.pos = pos if isinstance(pos, tuple) else None
         return area
+
+
+    def consumable(self, name, uid=None):
+
+        e = Entity(name, uid)
+
+        # extract the components corresponding to the name
+        # if name is unknown, return error
+        components = ['item']
+
+        return self.entity(e, components)
+
+    def loc(self, name: str, pos: Tuple, area: Entity, uid: uuid4()=None):
+        # TODO
+        loc = self.entity(name, area.components, uid)
+        return loc
 
     def make_world_system(self, name: str=None) -> WorldSystem:
 
@@ -61,9 +80,12 @@ class Factory(object):
         _map = OrderedDict()  # type: OrderedDict[Any,Any]
         for x in range(x_axis):
             for y in range(y_axis):
-                area = self.make_area(geo=((0, 0), (0, 0)),
-                                      terrain='mountains',
-                                      climate='tropical')
+                uid = uuid4()
+                area = self.area(pos=((x, y)),
+                                 name=uid,
+                                 terrain='mountains',
+                                 climate='tropical',
+                                 uid=uid)
 
                 _map[(x,y)] = area
 

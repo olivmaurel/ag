@@ -9,12 +9,12 @@ factory = Factory()
 first = Entity('first')
 
 
-island = factory.make_area(geo={'area':(1, 2),'local': (0, 0)},
-                           terrain='island',
-                           climate='tropical')
+island = factory.area(geo={'area':(1, 2), 'local': (0, 0)},
+                      terrain='island',
+                      climate='tropical')
 
-albonpin = factory.make_human('albonpin')
-skeleton = factory.make_entity('skeleton', components=['health'])
+albonpin = factory.human('albonpin')
+skeleton = factory.entity('skeleton', components=['health'])
 
 world = factory.make_world_system()
 

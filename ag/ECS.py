@@ -57,7 +57,7 @@ class Entity(object):
         cname = self.__class__.__name__
         name = self.name or self.uid
         if name != self.uid:
-            name = '{}:{}'.format(name, self.uid)
+            name = '{}'.format(name)
         return '<{} {}>'.format(cname, name)
 
     def __eq__(self, other: Any) -> bool:

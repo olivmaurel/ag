@@ -27,8 +27,8 @@ class TestWorldCreation(object):
 
     def test_100_turns_update(self, factory):
 
-        albonpin = factory.make_human('albonpin')
-        skeleton = factory.make_entity('skeleton', components=['health'])
+        albonpin = factory.human('albonpin')
+        skeleton = factory.entity('skeleton', components=['health'])
 
         world = factory.make_world_system()
 

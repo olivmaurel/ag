@@ -17,15 +17,15 @@ class TestArea(object):
     @pytest.fixture
     def area(self, factory):
 
-        return factory.make_area(geo={'area': (1, 2), 'local': (0, 0)},
-                                 terrain='plaines',
-                                 climate='continental')
+        return factory.area(geo={'area': (1, 2), 'local': (0, 0)},
+                            terrain='plaines',
+                            climate='continental')
 
     def test_create_area(self, factory):
 
-        island = factory.make_area(geo={'coords': {'area': (1, 2), 'local': (0, 0)}},
-                                   terrain='island',
-                                   climate='tropical')
+        island = factory.area(geo={'coords': {'area': (1, 2), 'local': (0, 0)}},
+                              terrain='island',
+                              climate='tropical')
         assert island.terrain.type == 'island'
         assert "<Area (1, 2):island/tropical" in island.name
 

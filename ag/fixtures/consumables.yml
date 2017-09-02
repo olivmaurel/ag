@@ -1,0 +1,33 @@
+parsnip:
+  traits:
+    - raw
+    - food
+    - root
+    - vegetable
+    - perishable
+  nutri: 3
+  unit: unit
+
+fresh water:
+  traits:
+    - uncountable
+    - liquid
+    - hydrating
+  nutri: 1
+  unit: liter
+
+almond:
+  origin: almond tree
+  traits:
+    - seed
+  nutri: 3
+  unit: grams
+
+meat:
+  origin: animal
+  traits:
+    - meat
+    - perishable
+    - raw
+  nutri : 5
+  unit: grams

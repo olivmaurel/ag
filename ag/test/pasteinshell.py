@@ -8,14 +8,14 @@ factory = Factory()
 
 world = factory.make_world_system()
 
-mountains = factory.make_area('mountain_range', 'mountains', 'alpine')
-island = factory.make_area('treasure island', 'island', 'tropical')
+mountains = factory.area('mountain_range', 'mountains', 'alpine')
+island = factory.area('treasure island', 'island', 'tropical')
 
 assert island.active == False
 assert mountains.active == True
 
-e = factory.make_human('e')
-skeleton = factory.make_entity('skeleton', ['health'])
+e = factory.human('e')
+skeleton = factory.entity('skeleton', ['health'])
 
 
 for i in range(100):
