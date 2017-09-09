@@ -1,5 +1,5 @@
 import pytest
-from ag.Factory import Factory
+from ag.factory import Factory
 from ag.systems import *
 
 

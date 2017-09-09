@@ -1,0 +1,19 @@
+river:
+  gives:
+    - fresh water
+    - fish
+
+beach:
+  gives:
+    - seashells
+    - fish
+    - sand
+
+woods:
+  gives:
+    - mushrooms
+    - wood
+    - trees:
+      - almond tree
+    - seeds:
+      - almonds

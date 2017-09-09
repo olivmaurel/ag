@@ -121,7 +121,7 @@ class Entity(object):
     def __del__(self):
         '''Remove the relationship from all component data'''
         for attr, component in self.components.items():
-            component.entity = None
+            component.entity_creation = None
             component.__class__.Catalog.pop(self)
         self.__class__.Catalog.pop(self)
 

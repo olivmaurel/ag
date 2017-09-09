@@ -1,27 +1,21 @@
-# YAML fixtures
 import yaml
-from ag.Factory import Factory
 
 
-factory = Factory()
-
-
+# YAML fixtures
 def parse_yaml(file):
 
     with open(file, "r") as stream:
         try:
-            print(yaml.load_all(stream))
+            yaml.load_all(stream)
         except yaml.YAMLError as exc:
-            print(exc)
-    y = ""
+            return exc
+
+
+def get_yaml_as_dict(filepath):
+    y = {}
+    with open(filepath, "r") as stream:
+        for name in yaml.load_all(stream):
+            for k,v in name.items():
+                y[k] = v
+
     return y
-
-
-def get_consumable():
-    y = parse_yaml("ag/fixtures/consumables.yml")
-    # transform parsed yaml string into entity with attached components
-    consumable = factory.consumable(y)
-
-
-
-

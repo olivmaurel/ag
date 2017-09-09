@@ -1,6 +1,6 @@
 import pytest
 from ag.ECS import Entity
-from ag.Factory import Factory
+from ag.factory import Factory
 from ag.components import *
 from ag.systems import *
 
@@ -19,7 +19,7 @@ class TestWorldCreation(object):
 
     def test_create_world_system(self, factory):
 
-        world = factory.make_world_system()
+        world = factory.world_system_creation()
         bio_s = BiologicalNeedsSystem()
         active_area = world.active_area
         world.add_system(world.active_coords, bio_s)
@@ -27,10 +27,10 @@ class TestWorldCreation(object):
 
     def test_100_turns_update(self, factory):
 
-        albonpin = factory.human('albonpin')
-        skeleton = factory.entity('skeleton', components=['health'])
+        albonpin = factory.human_creation('albonpin')
+        skeleton = factory.entity_creation('skeleton', components=['health'])
 
-        world = factory.make_world_system()
+        world = factory.world_system_creation()
 
         bio_s = BiologicalNeedsSystem()
         world.add_system(world.active_coords, bio_s)

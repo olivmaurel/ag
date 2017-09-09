@@ -3,7 +3,8 @@ parsnip:
     - raw
     - food
     - root
-    - vegetable
+    - vegetable:
+        season: autumn
     - perishable
   nutri: 3
   unit: unit
@@ -16,7 +17,7 @@ fresh water:
   nutri: 1
   unit: liter
 
-almond:
+almonds:
   origin: almond tree
   traits:
     - seed

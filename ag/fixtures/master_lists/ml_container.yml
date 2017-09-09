@@ -1,0 +1,36 @@
+pouch:
+  name: pouch
+  type: container
+  traits:
+    - carriable
+  size: 1
+  unit: litre
+  avg_capacity: 10
+  struct: 5
+bottle:
+    name: bottle
+    type: container
+    traits:
+      - carriable
+    size: 1
+    unit: litre
+    avg_capacity: 10
+    struct: 1
+amphora:
+    name: amphora
+    type: container
+    traits:
+      - carriable
+    size: 1
+    unit: litre
+    avg_capacity: 10
+    struct: 5
+cask:
+    name: cask
+    type: container
+    traits:
+      - huge
+    size: 1000
+    unit: litre
+    avg_capacity: 10
+    struct: 100

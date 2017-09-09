@@ -90,8 +90,8 @@ class Entity(object):
             # Create relationships between the entity and fixtures
             if isinstance(value, Component):
                 vCatalog = value.__class__.Catalog
-                if value.entity is None:
-                    value.entity = self
+                if value.entity_creation is None:
+                    value.entity_creation = self
                     # Update the component catalog with the entry
                     for entity, comp in vCatalog.items():
                         if comp == value:

@@ -6,7 +6,7 @@ from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtCore import Qt as qtcore
 
 from ag.settings import STATICPATH
-from ag.Factory import Factory
+from ag.factory import Factory
 
 
 
@@ -28,7 +28,7 @@ class Game(QMainWindow):
         # Icon
         self.setWindowIcon(QIcon(os.path.join(STATICPATH, 'images/icon.png')))
 
-        newchar = self.factory.human('Albonpin')
+        newchar = self.factory.human_creation('Albonpin')
         charbtn = QPushButton(newchar.name)
         charbtn.move(50, 0)
         nxtbtn = QPushButton('Next turn', self)

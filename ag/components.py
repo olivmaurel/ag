@@ -3,7 +3,7 @@ import itertools
 from collections import OrderedDict as dict
 from ag.ECS import Component, System, Entity
 from typing import Tuple
-
+from ag.models.item import Item
 
 class Hunger(Component):
 
@@ -69,9 +69,9 @@ class Geo(Component):
     def __init__(self, e: Entity, area: Entity=None, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         self.area = area
-        e.area = self.area
-        e.loc = self.loc
-        e.enter_area = self.enter_area
+        e.__setattr__(area, self.area)
+        e.__setattr__('loc', self.loc)
+        e.__setattr__('enter_area', self.enter_area)
 
     def enter_area(self, area: Entity):
 
@@ -89,7 +89,7 @@ class Geo(Component):
         self.entity.loc = loc
 
 
-class Movement(Component):
+class Mov(Component):
     pass
 
 
@@ -101,25 +101,68 @@ class Terrain(Component):
         return 'Woooo!'
 
 
-class Inventory(Component):
+class Inv(Component):
 
-    default = dict([('capacity', 100), ('content', []), ('filled', 0)])
+    defaults = dict([('capacity', 100), ('content', []), ('filled', 0)])
+
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        e.__setattr__('pickup', self.pickup)
+        e.__setattr__('drop', self.drop)
 
     @property
     def space_left(self):
         return self.capacity - self.filled
 
-    def add(self, item):
+    @property
+    def full(self):
+        return self.capacity <= 0
+
+    def add(self, item: Item):
         if(item.size <= self.space_left):
             self.content.append(item)
             self.filled += item.size
         else:
             return False
 
+    def remove(self, item: Item):
+        import pdb; pdb.set_trace()
+        if item in self.content:
+            self.content.remove(item)
+            self.filled -= item.size
+        else:
+            return False
+
+    def pickup(self, item: Item):
+        # update item position to match bearer position
+        self.add(item)
+
+    def drop(self, item: Item):
+        # TODO update position of the item
+        self.remove(item)
+
+
+class Container(Component):
+
+    defaults = dict([('unit', 'units'), ('size', 1), ('capacity', 10), ('filled', 0)])
+
+    @property
+    def space_left(self):
+        return self.capacity - self.filled
+
+    def add(self, item):
+        if item.size <= self.space_left:
+            self.content.append(item)
+            self.filled += item.size
+            self.size += item.size
+        else:
+            return False
+
     def remove(self, item):
-        if(item in self.content):
+        if item in self.content:
             self.content.pop(item)
             self.filled -= item.size
+            self.size -= item.size
         else:
             return False
 
@@ -129,7 +172,7 @@ class Climate(Component):
     defaults = dict([('type', 'tropical')])
 
 
-class Map(Component):
+class Map(Component): # TODO deprec remove
 
     def __init__(self, entity, x_size, y_size):
         super().__init__(self, entity)

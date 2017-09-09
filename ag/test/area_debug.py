@@ -1,4 +1,4 @@
-from ag.Factory import Factory
+from ag.factory import Factory
 from ag.components import *
 from ag.systems import *
 from ag.ECS import *
@@ -13,10 +13,10 @@ island = factory.area(geo={'area':(1, 2), 'local': (0, 0)},
                       terrain='island',
                       climate='tropical')
 
-albonpin = factory.human('albonpin')
-skeleton = factory.entity('skeleton', components=['health'])
+albonpin = factory.human_creation('albonpin')
+skeleton = factory.entity_creation('skeleton', components=['health'])
 
-world = factory.make_world_system()
+world = factory.world_system()
 
 bio_s = BiologicalNeedsSystem()
 world.add_system(world.active_coords, bio_s)

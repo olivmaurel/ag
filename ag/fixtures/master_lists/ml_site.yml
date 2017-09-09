@@ -1,0 +1,16 @@
+site:
+  name: volcano
+site:
+  name: salt mine
+site:
+  name: river
+site:
+  name: lake
+site:
+  name: bog
+  climate: - subpolar
+           - continental
+site:
+  name: cave
+  terrain: - mountains
+           - hills

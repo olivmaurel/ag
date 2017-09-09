@@ -1,0 +1,8 @@
+spindle:
+  type: tool
+hatchet:
+  type: tool
+  usage: woodcutting
+spindle whorl:
+  type: tool
+  usage: textile

@@ -27,7 +27,7 @@ class Entity(object):
 
     __slots__ = ['uid', 'name', 'components', 'conditions']
 
-    def __new__(cls, name: str=None, uid: str=None) -> Any:
+    def __new__(cls, name: str=None, uid: str=None, *args) -> Any:
         '''We only want one entity with the same name
         >>> player1 = Entity('player1')
         >>> player2 = Entity('player2')
@@ -37,6 +37,7 @@ class Entity(object):
         >>> player1 == player3
         True
         '''
+
         if name not in cls.Catalog:
             entity = super().__new__(cls)
             cls.Catalog[name] = entity
@@ -47,7 +48,7 @@ class Entity(object):
     def __hash__(self):
         return hash(self.uid)
 
-    def __init__(self, name=None, uid=None) -> None:
+    def __init__(self, name=None, uid=None, *args) -> None:
         self.uid = uuid4() if uid is None else uid
         self.name = name or ''
         self.components = OrderedDict()  # type: OrderedDict[Any,Any]
