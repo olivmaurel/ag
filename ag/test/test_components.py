@@ -1,7 +1,7 @@
 import pytest
-from ag.ECS import Entity
 from ag.factory import Factory
 from ag.components import *
+
 
 class TestComponents(object):
 
@@ -29,9 +29,9 @@ class TestComponents(object):
 
         factory.assign_component(e, 'geo', loc=(0, 0))
         assert e.geo.entity == e
-        assert e.geo.loc == (0, 0)
+        assert e.loc == (0, 0)
 
     def test_container_custom_units(self, factory):
 
-        e = factory.entity_creation('e', components=[{'container': {'unit': 'litre', 'size': 5}}])
+        e = factory.entity_creation('e', components=[{'liquidcontainer': {'unit': 'litre', 'size': 5}}])
         assert e.container.unit == 'litre'

@@ -5,16 +5,21 @@ from ag.ECS import *
 import ag.components
 
 factory = Factory()
+pouch = factory.item_creation('container', 'pouch')
 
-
-island = factory.area_creation(pos=(1, 2),
-                      name='Skull Island',
-                      terrain='island',
-                      climate='tropical')
+island = factory.area_creation(loc=(1, 2),
+                               name='Skull Island',
+                               terrain='island',
+                               climate='tropical')
 
 skeleton = factory.entity_creation('skeleton', components=['health'])
 albonpin = factory.human_creation('albonpin')
+albonpin.enter_area(island)
 pouch = factory.item_creation('container', 'pouch')
+
+albonpin.pickup(pouch)
+
+
 
 factory.assign_component(skeleton, 'geo')
 
@@ -28,7 +33,7 @@ bio_s = BiologicalNeedsSystem()
 
 world = factory.world_system_creation()
 
-pouch = factory.item_creation('container', 'pouch')
+
 
 print(albonpin.inv)
 # {}

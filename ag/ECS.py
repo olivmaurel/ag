@@ -88,6 +88,17 @@ class Entity(object):
             except KeyError:
                 return False
 
+    def __delattr__(self, key):
+
+        try:
+            return super().__delattr__(key)
+        except AttributeError:
+            try:
+                del self.components[key]
+            except KeyError: # if the attr is not in the components dict, turn back to a normal AttributeError
+                raise AttributeError
+
+
     def __setattr__(self, key, value):
         '''Allows access to the properties/fixtures as an attribute'''
 

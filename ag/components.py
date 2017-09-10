@@ -1,9 +1,8 @@
 import math
 import itertools
 from collections import OrderedDict as dict
-from ag.ECS import Component, System, Entity
-from typing import Tuple
-from ag.models.item import Item
+from ag.ECS import Component, Entity
+from typing import Tuple, Any
 
 class Hunger(Component):
 
@@ -69,19 +68,8 @@ class Geo(Component):
     def __init__(self, e: Entity, area: Entity=None, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         self.area = area
-        e.__setattr__(area, self.area)
+        e.__setattr__('area', self.area)
         e.__setattr__('loc', self.loc)
-        e.__setattr__('enter_area', self.enter_area)
-
-    def enter_area(self, area: Entity):
-
-        if (self.entity.area):
-            self.entity.area.entities.discard(self.entity)
-
-        self.entity.area = area
-        self.area = area
-
-        area.entities.add(self.entity)
 
     def enter_loc(self, loc: Tuple):
 
@@ -90,7 +78,26 @@ class Geo(Component):
 
 
 class Mov(Component):
-    pass
+
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        e.__setattr__('enter_area', self.enter_area)
+        e.__setattr__('moveto', self.moveto)
+
+    def enter_area(self, area: Entity):
+
+        if self.entity.area:
+            self.entity.area.entities.discard(self.entity)
+
+        self.entity.area = area
+
+        area.entities.add(self.entity)
+
+    def moveto(self, loc: Tuple[int, int]):
+
+        self.entity.loc = loc
+
+
 
 
 class Terrain(Component):
@@ -111,6 +118,9 @@ class Inv(Component):
         e.__setattr__('drop', self.drop)
 
     @property
+    def owner(self):
+        return self.entity
+    @property
     def space_left(self):
         return self.capacity - self.filled
 
@@ -118,59 +128,96 @@ class Inv(Component):
     def full(self):
         return self.capacity <= 0
 
-    def add(self, item: Item):
-        if(item.size <= self.space_left):
-            self.content.append(item)
-            self.filled += item.size
-        else:
-            return False
+    def add(self, item: Entity):
 
-    def remove(self, item: Item):
-        import pdb; pdb.set_trace()
+        self.content.append(item)
+        self.filled += item.size
+
+    def remove(self, item: Entity):
         if item in self.content:
             self.content.remove(item)
             self.filled -= item.size
         else:
             return False
 
-    def pickup(self, item: Item):
-        # update item position to match bearer position
-        self.add(item)
+    def pickup(self, item: Entity):
+        if self.entity.loc == item.loc and item.carriable and item.size <= self.space_left:
+            self.add(item)
+            item.carriedby(self.owner)
+        else:
+            return False
 
-    def drop(self, item: Item):
-        # TODO update position of the item
+    def drop(self, item: Entity):
         self.remove(item)
+        if item.carriable:
+            item.dropped()
 
+class Liquidcontainer(Component):
 
-class Container(Component):
+    defaults = dict([('capacity', 100), ('content', []), ('filled', 0), ('unit', 'litre')])
 
-    defaults = dict([('unit', 'units'), ('size', 1), ('capacity', 10), ('filled', 0)])
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
 
     @property
     def space_left(self):
         return self.capacity - self.filled
 
-    def add(self, item):
-        if item.size <= self.space_left:
-            self.content.append(item)
-            self.filled += item.size
-            self.size += item.size
+    def fill(self, liquid):
+        if not self.empty:
+            if self.content.type != liquid.type:
+                return False
         else:
-            return False
+            self.filled += liquid.volume
+            if self.space_left < 0:
+                self.filled = self.capacity
+                self.content.volume = self.capacity
 
-    def remove(self, item):
-        if item in self.content:
-            self.content.pop(item)
-            self.filled -= item.size
-            self.size -= item.size
-        else:
-            return False
+    def pour(self, volume: int, recipient: Entity):
+        self.filled -= volume
+        liquid = Liquid(self.content.type)
+        recipient.receive(liquid)
+
+
+class Liquid(Component):
+
+    def __init__(self, e: Entity, type: str, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        self.type = type
+
+
 
 
 class Climate(Component):
 
     defaults = dict([('type', 'tropical')])
 
+
+class Carriable(Component):
+
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        self.carrier = None
+        e.__setattr__('carrier', self.carrier)
+        e.__setattr__('carriedby', self.carriedby)
+        e.__setattr__('dropped', self.dropped)
+
+    def carriedby(self, e: Entity):
+        self.carrier = e
+        self.entity.carrier = e
+        if self.entity.geo != False:
+            self.entity.__delattr__('area')
+            self.entity.__delattr__('loc')
+            del self.entity.components['geo']
+
+
+    def dropped(self):
+
+        self.entity.geo = Geo(self.entity)
+        self.entity.area = self.entity.carrier.area
+        self.entity.loc = self.entity.carrier.loc
+        self.carrier = None
+        self.entity.carrier = None
 
 class Map(Component): # TODO deprec remove
 

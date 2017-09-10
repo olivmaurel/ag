@@ -3,6 +3,7 @@ pouch:
   type: container
   traits:
     - carriable
+    - liquidcontainer
   size: 1
   unit: litre
   avg_capacity: 10
@@ -12,6 +13,7 @@ bottle:
     type: container
     traits:
       - carriable
+      - liquidcontainer
     size: 1
     unit: litre
     avg_capacity: 10
@@ -21,6 +23,7 @@ amphora:
     type: container
     traits:
       - carriable
+      - liquidcontainer
     size: 1
     unit: litre
     avg_capacity: 10
@@ -30,6 +33,7 @@ cask:
     type: container
     traits:
       - huge
+      - liquidcontainer
     size: 1000
     unit: litre
     avg_capacity: 10
