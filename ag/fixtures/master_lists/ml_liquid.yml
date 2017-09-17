@@ -1,0 +1,15 @@
+water:
+  name: water
+  type: liquid
+  traits:
+    - liquid
+    - drink
+  weight: 1
+  unit: litre
+oil:
+  name: oil
+  type: liquid
+  traits:
+    - liquid
+  weight: 0.9
+  unit: litre

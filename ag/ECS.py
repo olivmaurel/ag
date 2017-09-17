@@ -2,7 +2,7 @@ from uuid import uuid4
 from collections import OrderedDict
 from collections import defaultdict
 import json
-from typing import Any, List, DefaultDict
+from typing import Any, List, DefaultDict, Union
 
 class Entity(object):
     """
@@ -160,7 +160,7 @@ class Component:
             component = cls.Catalog[entity]
         return component
 
-    def __init__(self, entity: str=None, *args: List, **properties: dict) -> None:
+    def __init__(self, entity: Union[Entity, str]=None, *args: List, **properties: dict) -> None:
 
         self.entity = entity
         for prop_name, value in self.defaults.items():

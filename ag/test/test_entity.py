@@ -58,7 +58,7 @@ class TestEntities(object):
 
     def test_recreate_entity_different_components(self, factory):
 
-        first = factory.entity_creation('e', components=[{'geo': {'loc': (0, 1)}}])
+        first = factory.entity_creation('e', components=[{'geo': {'pos': (0, 1)}}])
         second = factory.entity_creation('e', components=['Health'])
 
         assert 'position' not in second.components

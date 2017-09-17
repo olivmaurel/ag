@@ -1,5 +1,4 @@
-resource:
-  name: bamboo
+bamboo:
   terrain:
     - mountains
     - hills
@@ -7,8 +6,7 @@ resource:
     - continental
     - alpine
 
-resource:
-  name: deer
+deer:
   terrain:
     - forest
     - mountains
@@ -21,11 +19,12 @@ resource:
     - bone
     - skin
 
-resource:
-  name: salt
+salt:
   terrain:
     - coast
     - island
   climate:
     - oceanic
     - temperate
+  gives:
+    - salt

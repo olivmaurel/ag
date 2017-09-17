@@ -2,17 +2,18 @@ import math
 import itertools
 from collections import OrderedDict as dict
 from ag.ECS import Component, Entity
-from typing import Tuple, Any
+from typing import Tuple, Any, Callable
+
 
 class Hunger(Component):
 
     defaults = dict([('current', 100), ('max', 100)])
-    hungerscale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
+    hunger_scale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
 
     @property
     def status(self) -> str:
         c = int(math.ceil(self.current / 25.0)) * 25
-        return self.hungerscale[c]
+        return self.hunger_scale[c]
 
 
 class Thirst(Component):
@@ -63,18 +64,18 @@ class Health(Component):
 
 class Geo(Component):
 
-    defaults = dict([('loc', (0, 0))])
+    defaults = dict([('pos', (0, 0))])
 
     def __init__(self, e: Entity, area: Entity=None, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         self.area = area
         e.__setattr__('area', self.area)
-        e.__setattr__('loc', self.loc)
+        e.__setattr__('pos', self.pos)
 
-    def enter_loc(self, loc: Tuple):
+    def enter_loc(self, pos: Tuple):
 
-        self.loc = loc
-        self.entity.loc = loc
+        self.pos = pos
+        self.entity.pos = pos
 
 
 class Mov(Component):
@@ -84,20 +85,41 @@ class Mov(Component):
         e.__setattr__('enter_area', self.enter_area)
         e.__setattr__('moveto', self.moveto)
 
-    def enter_area(self, area: Entity):
+    def enter_area(self, area: Entity, pos: Tuple[int, int]):
 
-        if self.entity.area:
-            self.entity.area.entities.discard(self.entity)
-
+        if self.entity.area is not None:
+            self.entity.area.map[pos].remove(self.entity)
+        self.entity.pos = pos
         self.entity.area = area
 
-        area.entities.add(self.entity)
+        area.map[pos].entities = self.entity
 
-    def moveto(self, loc: Tuple[int, int]):
+    def moveto(self, pos: Tuple[int, int]):
 
-        self.entity.loc = loc
+        self.entity.pos = pos
 
 
+class Location(Component):
+
+    def __init__(self, e: Entity, area: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        self.systems = set()
+        self.area = area
+        self.entities = set()
+        e.__setattr__('systems', self.systems)
+        e.__setattr__('area', self.area)
+        e.__setattr__('entities', self.entities)
+
+
+class Per(Component):
+
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        e.__setattr__('locate', self.locate)
+
+    def locate(self, something):
+        pass
+        # if isinstance(something, )
 
 
 class Terrain(Component):
@@ -141,7 +163,7 @@ class Inv(Component):
             return False
 
     def pickup(self, item: Entity):
-        if self.entity.loc == item.loc and item.carriable and item.size <= self.space_left:
+        if self.entity.pos == item.pos and item.carriable and item.size <= self.space_left:
             self.add(item)
             item.carriedby(self.owner)
         else:
@@ -151,6 +173,7 @@ class Inv(Component):
         self.remove(item)
         if item.carriable:
             item.dropped()
+
 
 class Liquidcontainer(Component):
 
@@ -186,8 +209,6 @@ class Liquid(Component):
         self.type = type
 
 
-
-
 class Climate(Component):
 
     defaults = dict([('type', 'tropical')])
@@ -207,26 +228,26 @@ class Carriable(Component):
         self.entity.carrier = e
         if self.entity.geo != False:
             self.entity.__delattr__('area')
-            self.entity.__delattr__('loc')
+            self.entity.__delattr__('pos')
             del self.entity.components['geo']
-
 
     def dropped(self):
 
         self.entity.geo = Geo(self.entity)
         self.entity.area = self.entity.carrier.area
-        self.entity.loc = self.entity.carrier.loc
+        self.entity.pos = self.entity.carrier.pos
         self.carrier = None
         self.entity.carrier = None
 
-class Map(Component): # TODO deprec remove
 
-    def __init__(self, entity, x_size, y_size):
-        super().__init__(self, entity)
-        self.x_size = x_size
-        self.y_size = y_size
-        self.grid = dict((coord, []) for coord in
-                    [g for g in itertools.product(range(x_size), range(y_size))])
+class Updater(Component):
 
-    def __str__(self):
-        return self.grid
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        self.systems = []
+        e.__setattr__('systems', self.systems)
+        e.__setattr__('update', self.update)
+
+    def update(self):
+        for system in self.systems:
+            system.update()

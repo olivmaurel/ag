@@ -1,6 +1,6 @@
-from ag.ECS import System
+from ag.ECS import System, Entity
 from collections import OrderedDict
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 class BiologicalNeedsSystem(System):
@@ -46,47 +46,59 @@ class GeoSystem(System):
 class WorldSystem(System):
 
     # components = ['Map']
-
+    Active_area_default_systems = [BiologicalNeedsSystem]
     def __init__(self, name='World', _map: OrderedDict=None, components: List=[]):
 
         super().__init__(name, components)
-        self._map = _map
-        self.active_coords = (0, 0)
+        self.map = _map
+        self.active_pos = None
 
 
     @property
     def active_area(self):
-        return self._map[self.active_coords]
+        return self.map[self.active_pos]
 
     def update(self):
 
-        self.update_active_area()
+        self.active_area.update()
         self.update_inactive_areas()
 
-    def update_area(self, coords: Tuple[int, int]):
-
-        for system in self._map[coords].systems:
-            system.update()
-
-    def update_active_area(self):
-        return self.update_area(self.active_area)
-
     def update_inactive_areas(self):
-        for coord in self._map.items():
-                if coord != self.active_area:
-                    self.update_area(coord)
+        pass
+        #for coord in self._map.items():
+        #        if coord != self.active_area:
+        #           coord.update()
 
-    def add_system(self, coords: Tuple[int, int], system: System):
+    def add_system(self, pos: Tuple[int, int], system: System):
 
         if isinstance(system, System):
-            self._map[coords].systems.append(system)
+            self.map[pos].systems.add(system)
         else:
             raise TypeError("The variable {} is not a system, it's a {}"
                             .format(system, type(system)))
 
-    def set_active_area(self, coords: Tuple[int, int]):
+    def remove_system(self, pos: Tuple[int, int], system: System):
 
-        if coords in self._map.keys():
-            self.active_coords = coords
+        if isinstance(system, System):
+            self.map[pos].systems.remove(system)
+        else:
+            raise TypeError("The variable {} is not a system, it's a {}"
+                            .format(system, type(system)))
+
+    def set_active_area(self, pos: Union[Entity, Tuple[int, int]]):
+
+        if isinstance(pos, Entity):
+            pos = pos.pos
+
+        if pos in self.map.keys():
+            if self.active_pos is not None:
+                self.active_area.systems.clear()
+            self.active_pos = pos
+            self.assign_default_systems_to_active_area()
         else:
             raise KeyError('No such coordinates in {}.map'.format(self.name))
+
+    def assign_default_systems_to_active_area(self):
+
+        for system in self.Active_area_default_systems:
+            self.active_area.systems.add(system())

@@ -35,7 +35,7 @@ class TestInventory(object):
         e.pickup(bottle)
         e.moveto((1, 1))
 
-        assert bottle.loc == False
+        assert bottle.pos == False
         assert bottle.area == False
         assert bottle.geo == False
 
@@ -43,7 +43,7 @@ class TestInventory(object):
 
         e.moveto((0, 0))
         bottle = factory.item_creation('container', 'bottle')
-        bottle.loc = (1, 1)
+        bottle.pos = (1, 1)
         assert e.pickup(bottle) == False
 
     def test_drop_then_move(self, e, factory):
@@ -55,7 +55,7 @@ class TestInventory(object):
         e.drop(bottle)
         e.moveto((2, 2))
 
-        assert bottle.loc == (1, 1)
+        assert bottle.pos == (1, 1)
 
     def test_create_item_twice(self, factory):
 

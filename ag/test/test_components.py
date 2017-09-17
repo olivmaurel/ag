@@ -27,11 +27,11 @@ class TestComponents(object):
 
     def test_position(self, factory, e):
 
-        factory.assign_component(e, 'geo', loc=(0, 0))
+        factory.assign_component(e, 'geo', pos=(0, 0))
         assert e.geo.entity == e
-        assert e.loc == (0, 0)
+        assert e.pos == (0, 0)
 
     def test_container_custom_units(self, factory):
 
         e = factory.entity_creation('e', components=[{'liquidcontainer': {'unit': 'litre', 'size': 5}}])
-        assert e.container.unit == 'litre'
+        assert e.liquidcontainer.unit == 'litre'
