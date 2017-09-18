@@ -204,7 +204,6 @@ class Liquidcontainer(Component):
     @property
     def space_left(self):
         return self.capacity - self.filled
-
     def fill(self, liquid):
         if not self.empty:
             if self.content.type != liquid.type:
