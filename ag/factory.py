@@ -69,7 +69,7 @@ class Factory(object):
                            {'climate': [climate]}])
         area = self.entity_creation(name, components, uid)
         area.__setattr__('pos', pos if isinstance(pos, tuple) else None)
-        area.__setattr__('systems', set())
+        area.__setattr__('systems', [])
         area.__setattr__('map', {})
 
         for x in range(map_dimensions[0]):
@@ -77,7 +77,7 @@ class Factory(object):
                 loc_name = "location {}".format(map_dimensions)
                 location = self.entity_creation(loc_name)
                 location.__setattr__('area', area)
-                location.__setattr__('entities', set())
+                location.__setattr__('entities', [])
                 area.map[(x, y)] = location
 
         return area

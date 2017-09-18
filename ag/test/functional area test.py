@@ -13,9 +13,9 @@ island = factory.area_creation(pos=(1, 2),
                                climate='tropical')
 
 mountains = factory.area_creation(pos=(1, 1),
-                               name='Skull Island',
-                               terrain='island',
-                               climate='tropical')
+                               name='Black Mountains',
+                               terrain='mountains',
+                               climate='alpine')
 
 world.map[island.pos] = island
 world.map[mountains.pos] = mountains
@@ -32,14 +32,24 @@ grok = factory.human_creation('grok')
 skeleton = factory.entity_creation('skeleton', components=['health', 'geo', 'mov'])
 
 albonpin.enter_area(island, pos=(1, 1))
-skeleton.enter_area(island, pos=(1, 1))
-grok.enter_area(mountains, pos=(2, 2))
+grok.enter_area(island, pos=(1, 1))
+skeleton.enter_area(island, pos=(1, 2))
+grok.enter_area(mountains, pos=(1, 1))
 
-island.update()
 
-for i in range(100):
-    world.update()
 
-assert albonpin.health.alive == False
-assert skeleton.health.alive == True
-assert grok.healh.alive == True
+# todo 2) biosystem updates everybody, not just within the area
+
+
+
+for i in range(20): # 0680191N
+    island.update()
+
+assert albonpin.thirst.status == 'parched'
+
+pouch = factory.item_creation('container', 'pouch')
+amphora = factory.item_creation('container', 'amphora')
+cask = factory.item_creation('container', 'cask')
+albonpin.moveto((0,0))
+albonpin.pickup(pouch)
+albonpin.pickup(amphora)

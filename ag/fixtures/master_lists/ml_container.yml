@@ -32,7 +32,6 @@ cask:
     name: cask
     type: container
     traits:
-      - huge
       - liquidcontainer
     size: 1000
     unit: litre

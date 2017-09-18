@@ -11,7 +11,6 @@
   "ag/test/test_simple.py::test_answer": true,
   "ag/test/test_systems.py::TestSystems::()::test_systems_catalog_updates": true,
   "ag/test/test_systems.py::TestWorldCreation::()::test_systems_catalog_updates": true,
-  "ag/test/test_world_creation.py::TestWorldCreation": true,
   "ag/test/test_world_creation.py::TestWorldCreation::()::test_100_turns_update": true,
   "ag/test/test_world_creation.py::TestWorldCreation::()::test_instantiate_world": true,
   "ag/test/test_world_creation.py::TestWorldCreation::()::test_two": true

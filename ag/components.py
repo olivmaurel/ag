@@ -1,8 +1,9 @@
 import math
-import itertools
 from collections import OrderedDict as dict
 from ag.ECS import Component, Entity
-from typing import Tuple, Any, Callable
+from typing import Tuple
+from ag.settings import logging
+
 
 
 class Hunger(Component):
@@ -19,12 +20,12 @@ class Hunger(Component):
 class Thirst(Component):
 
     defaults = dict([('current', 100), ('max', 100)])
-    thirstscale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
+    thirst_scale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
 
     @property
     def status(self) -> str:
         c = int(math.ceil(self.current / 25.0)) * 25
-        return self.thirstscale[c]
+        return self.thirst_scale[c]
 
 
 class Health(Component):
@@ -72,11 +73,6 @@ class Geo(Component):
         e.__setattr__('area', self.area)
         e.__setattr__('pos', self.pos)
 
-    def enter_loc(self, pos: Tuple):
-
-        self.pos = pos
-        self.entity.pos = pos
-
 
 class Mov(Component):
 
@@ -88,11 +84,10 @@ class Mov(Component):
     def enter_area(self, area: Entity, pos: Tuple[int, int]):
 
         if self.entity.area is not None:
-            self.entity.area.map[pos].remove(self.entity)
-        self.entity.pos = pos
+            self.entity.area.map[pos].entities.remove(self.entity)
         self.entity.area = area
-
-        area.map[pos].entities = self.entity
+        self.moveto(pos)
+        area.map[pos].entities.append(self.entity)
 
     def moveto(self, pos: Tuple[int, int]):
 
@@ -103,9 +98,9 @@ class Location(Component):
 
     def __init__(self, e: Entity, area: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
-        self.systems = set()
+        self.systems = []
         self.area = area
-        self.entities = set()
+        self.entities = []
         e.__setattr__('systems', self.systems)
         e.__setattr__('area', self.area)
         e.__setattr__('entities', self.entities)
@@ -125,9 +120,6 @@ class Per(Component):
 class Terrain(Component):
 
     defaults = dict([('type', 'island')])
-
-    def dostuff(self):
-        return 'Woooo!'
 
 
 class Inv(Component):
@@ -156,23 +148,49 @@ class Inv(Component):
         self.filled += item.size
 
     def remove(self, item: Entity):
-        if item in self.content:
+
+        if item not in self.content:
+            logging.error('{} is not in {} inventory'.format(item.name, self.entity.name))
+            return False
+        else:
             self.content.remove(item)
             self.filled -= item.size
-        else:
-            return False
+            return True
 
     def pickup(self, item: Entity):
-        if self.entity.pos == item.pos and item.carriable and item.size <= self.space_left:
+
+        if self.entity.pos != item.pos:
+            logging.error('{}({}) is not located in {}, impossible to pickup {}'
+                           .format(self.entity.name, self.entity.pos, item.pos, item.name))
+            return False
+        elif not item.carriable:
+            logging.error('{} cannot be picked up, it is not a carriable item'.format(item.name))
+            return False
+        elif item.size > self.space_left:
+            logging.error('Not enough space left in {} inventory. '
+                          'The item is {} units big, and there is only {} space left.'
+                          .format(self.entity.name, item.size, self.space_left))
+            return False
+        else:
             self.add(item)
             item.carriedby(self.owner)
-        else:
-            return False
+            return True
 
     def drop(self, item: Entity):
-        self.remove(item)
-        if item.carriable:
+
+        if not item.carriable:
+            logging.error('{} cannot be dropped, not a carriable item.'.format(item.name))
+            return False
+        if item not in self.content:
+            logging.error('{} is not in {} inventory'.format(item.name, self.entity.name))
+            return False
+        else:
+            self.remove(item)
             item.dropped()
+            return True
+
+    def __repr__(self):
+        return str(self.content)
 
 
 class Liquidcontainer(Component):
@@ -181,6 +199,7 @@ class Liquidcontainer(Component):
 
     def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
+        e.__setattr__('filled', self.filled)
 
     @property
     def space_left(self):
@@ -189,17 +208,20 @@ class Liquidcontainer(Component):
     def fill(self, liquid):
         if not self.empty:
             if self.content.type != liquid.type:
+                logging.error("Can't add {} to a container filled with {}"
+                              .format(liquid.type, self.content.type))
                 return False
         else:
             self.filled += liquid.volume
             if self.space_left < 0:
                 self.filled = self.capacity
                 self.content.volume = self.capacity
+            return True
 
     def pour(self, volume: int, recipient: Entity):
         self.filled -= volume
         liquid = Liquid(self.content.type)
-        recipient.receive(liquid)
+        recipient.receive(liquid) # todo drink action with Character drinking Liquid from Liquidcontainer
 
 
 class Liquid(Component):
@@ -208,6 +230,12 @@ class Liquid(Component):
         super().__init__(e, *args, **kwargs)
         self.type = type
 
+
+class Drinkable(Liquid):
+
+    def __init__(self, e: Entity, type: str, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+    # TODO add attr drink to 'liquidcontainer' entity if possible
 
 class Climate(Component):
 
@@ -249,5 +277,5 @@ class Updater(Component):
         e.__setattr__('update', self.update)
 
     def update(self):
-        for system in self.systems:
+        for system in self.entity.systems:
             system.update()

@@ -13,7 +13,7 @@ island = factory.area_creation(pos=(1, 2),
                                climate='tropical')
 world.map[island.pos] = island
 world.set_active_area(island.pos)
-pouch = factory.item_creation('container', 'pouch')
+
 
 
 skeleton = factory.entity_creation('skeleton', components=['health'])

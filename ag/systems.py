@@ -47,6 +47,7 @@ class WorldSystem(System):
 
     # components = ['Map']
     Active_area_default_systems = [BiologicalNeedsSystem]
+
     def __init__(self, name='World', _map: OrderedDict=None, components: List=[]):
 
         super().__init__(name, components)
@@ -72,7 +73,7 @@ class WorldSystem(System):
     def add_system(self, pos: Tuple[int, int], system: System):
 
         if isinstance(system, System):
-            self.map[pos].systems.add(system)
+            self.map[pos].systems.append(system)
         else:
             raise TypeError("The variable {} is not a system, it's a {}"
                             .format(system, type(system)))
@@ -101,4 +102,4 @@ class WorldSystem(System):
     def assign_default_systems_to_active_area(self):
 
         for system in self.Active_area_default_systems:
-            self.active_area.systems.add(system())
+            self.active_area.systems.append(system())
