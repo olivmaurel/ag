@@ -5,7 +5,6 @@ from typing import Tuple
 from ag.settings import logging
 
 
-
 class Hunger(Component):
 
     defaults = dict([('current', 100), ('max', 100)])

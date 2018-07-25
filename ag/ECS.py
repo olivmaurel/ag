@@ -4,6 +4,7 @@ from collections import defaultdict
 import json
 from typing import Any, List, DefaultDict, Union
 
+
 class Entity(object):
     """
     More or less a container for an id
@@ -198,10 +199,8 @@ class Component:
         return getattr(self, key)
 
     def __setitem__(self, key, value):
-        '''Allows access to attributes as a dictionary'''
+
         return setattr(self, key, value)
-
-
 
     def restart(self):
         for prop_name, value in self.defaults.items():
