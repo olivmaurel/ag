@@ -10,7 +10,7 @@ class TestArea(object):
         return Factory()
 
     @pytest.fixture
-    def e(self):
+    def entity(self):
         return Entity('e')
 
     @pytest.fixture
@@ -47,17 +47,20 @@ class TestArea(object):
         assert "<Nice Island" in island.name
         assert island.climate.type == 'tropical'
 
-    def test_assign_area_to_entity(self, factory, e, plains):
+    def test_basic(self):
+        assert 2 == 2
 
-        factory.assign_component(e, 'geo')
-        factory.assign_component(e, 'mov')
-        assert e.geo.pos == (0, 0)
-        e.enter_area(plains)
+    def test_assign_area_to_entity(self, factory, entity, plains):
 
-    def test_geo(self, factory, e, plains):
+        factory.assign_component(entity, 'geo')
+        factory.assign_component(entity, 'mov')
+        assert entity.geo.pos == (0, 0)
+        entity.enter_area(plains)
 
-        factory.assign_component(e, 'geo')
-        factory.assign_component(e, 'mov')
+    def test_geo(self, factory, entity, plains):
+
+        factory.assign_component(entity, 'geo')
+        factory.assign_component(entity, 'mov')
         e.enter_area(plains)
         assert e.area == plains
         assert e.area.pos == (4, 2)
@@ -70,6 +73,3 @@ class TestArea(object):
 
     def test_active_area_and_inactive_area_update(self, factory, world, plains, island):
         pass
-
-
-
