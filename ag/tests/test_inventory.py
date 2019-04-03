@@ -18,7 +18,8 @@ class TestInventory(object):
     def test_pickup_item(self, e, factory):
 
         bottle = factory.item_creation('container', 'bottle')
-        e.pickup(bottle)
+        assert bottle.carriable is not False
+        assert e.pickup(bottle) is not False
         assert e.inv.space_left == e.inv.capacity - bottle.size
 
     def test_drop_item(self, e, factory):

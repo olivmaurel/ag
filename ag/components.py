@@ -8,23 +8,23 @@ from ag.settings import logging
 class Hunger(Component):
 
     defaults = dict([('current', 100), ('max', 100)])
-    hunger_scale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
+    scale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
 
     @property
     def status(self) -> str:
         c = int(math.ceil(self.current / 25.0)) * 25
-        return self.hunger_scale[c]
+        return self.scale[c]
 
 
 class Thirst(Component):
 
     defaults = dict([('current', 100), ('max', 100)])
-    thirst_scale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
+    scale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
 
     @property
     def status(self) -> str:
         c = int(math.ceil(self.current / 25.0)) * 25
-        return self.thirst_scale[c]
+        return self.scale[c]
 
 
 class Health(Component):
@@ -55,7 +55,11 @@ class Health(Component):
     >>> print (player.health.Catalog)
     {<Entity player:0>: <Health  entity:player.health>}
     '''
-    defaults = dict([('current', 100), ('max', 100)])
+    defaults = dict([('current', 100), ('max', 100), ('min', 0)])
+
+    def change(self, value):
+        if self.alive:
+            self.current = max(self.current + value, self.min)
 
     @property
     def alive(self) -> bool:
@@ -66,7 +70,7 @@ class Geo(Component):
 
     defaults = dict([('pos', (0, 0))])
 
-    def __init__(self, e: Entity, area: Entity=None, *args, **kwargs) -> None:
+    def __init__(self, e: Entity, area: Entity = None, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         self.area = area
         e.__setattr__('area', self.area)
@@ -82,11 +86,19 @@ class Mov(Component):
 
     def enter_area(self, area: Entity, pos: Tuple[int, int]):
 
-        if self.entity.area is not None:
-            self.entity.area.map[pos].entities.remove(self.entity)
+        if not area:
+            logging.error('{} mov component cannot enter area {}'.format(self, area))
+            return KeyError('error')
+
+        self.leave_area(pos)
         self.entity.area = area
         self.moveto(pos)
         area.map[pos].entities.append(self.entity)
+
+    def leave_area(self, pos: Tuple[int, int]):
+
+        if self.entity.area:
+            self.entity.area.map[pos].entities.remove(self.entity)
 
     def moveto(self, pos: Tuple[int, int]):
 

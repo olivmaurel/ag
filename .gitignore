@@ -39,3 +39,10 @@ tmtagsHistory
 *.sublime-project
 *.sublime-workspace
 .bundle
+
+# Virtual environments
+*.env
+Venvs
+Envs
+envs
+

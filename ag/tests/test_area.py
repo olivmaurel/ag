@@ -30,7 +30,7 @@ class TestArea(object):
     @pytest.fixture
     def location(self, factory):
 
-        return factory.location_creation('river'(1,2))
+        return factory.location_creation('river'(1, 2))
 
     @pytest.fixture
     def world(self, factory):
@@ -55,21 +55,21 @@ class TestArea(object):
         factory.assign_component(entity, 'geo')
         factory.assign_component(entity, 'mov')
         assert entity.geo.pos == (0, 0)
-        entity.enter_area(plains)
+        entity.enter_area(plains, (0, 0))
 
     def test_geo(self, factory, entity, plains):
 
         factory.assign_component(entity, 'geo')
         factory.assign_component(entity, 'mov')
-        e.enter_area(plains)
-        assert e.area == plains
-        assert e.area.pos == (4, 2)
-        assert e in plains.entities
+        entity.enter_area(plains, (0, 0))
+        assert entity.area == plains
+        assert entity.area.pos == (4, 2)
+        assert entity in plains.map[(0, 0)].entities
 
     def test_location_creation(self, factory, plains):
 
         river = factory.location_creation('river', (1, 1), plains)
-        assert plains.locations[(1,1)] == river
+        assert plains.map[(1, 1)] == river
 
     def test_active_area_and_inactive_area_update(self, factory, world, plains, island):
         pass

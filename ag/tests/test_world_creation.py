@@ -4,6 +4,7 @@ from ag.factory import Factory
 from ag.components import *
 from ag.systems import *
 
+
 class TestWorldCreation(object):
 
     @pytest.fixture
@@ -49,11 +50,10 @@ class TestWorldCreation(object):
         assert world.active_area == island
         assert world.map[(0,0)] != island
 
-
     def test_100_turns_update(self, factory, island):
 
         albonpin = factory.human_creation('albonpin')
-        skeleton = factory.entity_creation('skeleton', components=['health'])
+        skeleton = factory.entity_creation('skeleton', components=['health', 'mov'])
 
         albonpin.enter_area(island, pos=(1, 1))
         skeleton.enter_area(island, pos=(1, 1))

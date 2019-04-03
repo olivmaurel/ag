@@ -11,8 +11,8 @@ class TestSystems(object):
 
     def test_create_system(self):
 
-        s = System('test')
-        assert s.name == 'test'
+        s = System('tests')
+        assert s.name == 'tests'
 
     def test_systems_catalog_updates(self):
 
@@ -20,4 +20,8 @@ class TestSystems(object):
         w = WorldSystem()
 
         assert b != w
-        assert len(b.Catalog) == 3
+        assert len(b.Catalog) == len(w.Catalog)
+
+        assert 'tests' in b.Catalog
+        assert 'world' in b.Catalog
+

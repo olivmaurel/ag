@@ -20,7 +20,7 @@ class Factory(object):
             return self.item
 
     def set_master_list(self, listname):
-        path = 'ag/fixtures/master_lists/'
+        path = '../fixtures/master_lists/'
         y = get_yaml_as_dict('{}{}.yml'.format(path, listname))
         self.__setattr__(listname, y)
 
@@ -61,10 +61,10 @@ class Factory(object):
         return self.entity_creation(e, components)
 
     def area_creation(self, name: str, pos: Tuple[int, int], terrain: str, climate: str, components: list = [],
-                      uid: uuid4() = None, map_dimensions: Tuple[int, int]=(10,10)) -> Entity:
+                      uid: uuid4() = None, map_dimensions: Tuple[int, int] = (10, 10)) -> Entity:
 
         name = ('<{} {}:{}/{}>'.format(name, pos, terrain, climate))
-        components.extend([ 'updater',
+        components.extend(['updater',
                            {'terrain': [terrain]},
                            {'climate': [climate]}])
         area = self.entity_creation(name, components, uid)
@@ -82,24 +82,37 @@ class Factory(object):
 
         return area
 
-    def item_creation(self, type: str, name: str, components: List = []) -> Entity:
+    def item_creation(self, reftype: str, name: str, components: List = []) -> Entity:
+
+        components.append('geo')
+
+        return self.create_from_masterlist(reftype, name, components)
+
+    def create_from_masterlist(self, reftype: str, name: str, components: List = []):
 
         try:
-            ml_ref = self.__getattr__('ml_{}'.format(type))[name]  # type: dict
+            ml_ref = self.__getattr__('ml_{}'.format(reftype))[name]
         except AttributeError:
-            ml_ref = self.__getattribute__('ml_{}'.format(type))[name]  # type: dict
-        components.append('geo')
-        components.extend(ml_ref['traits'])
-        uid = uuid4()  # type: uuid4()
-        name = "{}-{}".format(ml_ref['name'], uid)  # type: str
+            ml_ref = self.__getattribute__('ml_{}'.format(reftype))[name]
+        uid = uuid4()
+        name = "{}-{}".format(name, uid)
 
-        e = self.entity_creation(name, components)
+        if 'traits' in ml_ref:
+            components.extend(ml_ref['traits'])
 
-        for k, v in ml_ref.items():
-            if not hasattr(e, k) or e.k == False:
-                e.__setattr__(k, v)
+        entity = self.entity_creation(name, components, uid)
 
-        return e
+        for key, value in ml_ref.items():
+            if not hasattr(entity, key) or entity.key is False:
+                entity.__setattr__(key, value)
+
+        return entity
+
+    def location_creation(self, name: str, pos: Tuple[int, int], area: Entity, components: List = []):
+
+        location = self.create_from_masterlist('location', name, components)
+        area.map[pos] = location
+        return location
 
     def world_system_creation(self, name: str = None) -> WorldSystem:
 

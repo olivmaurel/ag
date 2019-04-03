@@ -1,4 +1,18 @@
 
+# Installation
+
+Solve the import module headache
+> $ export PYTHONPATH=$PYTHONPATH:`pwd`
+
+install dependencies
+> $ pip install -r requirements.txt
+
+# Testing
+launch the tests
+> $ pytest
+
+
+
 From the main menu, click new game
 
 > New Game

@@ -215,7 +215,7 @@ class System(object):
     components = list() # type: List[str]
     Catalog = OrderedDict()  # type: OrderedDict[Any,Any]
 
-    def __new__(cls, name: str=None, components: list=[]) -> Any:
+    def __new__(cls, name: str = None, components: list = []) -> Any:
         '''Add systems to the catalog'''
 
         name = cls.__name__ if name is None else name
@@ -227,7 +227,7 @@ class System(object):
             system = System.Catalog[name]
         return system
 
-    def __init__(self, name: str=None, components: list=[]) -> None:
+    def __init__(self, name: str = None, components: list = []) -> None:
 
         self.name = self.__class__.__name__ if name is None else name
         if components:
