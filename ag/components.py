@@ -1,7 +1,11 @@
 import math
 from collections import OrderedDict as dict
+from enum import Enum
+
 from ag.ECS import Component, Entity
 from typing import Tuple
+
+from ag.exceptions.exceptions import EmptyContainerException, NoSuchComponentException, MixedLiquidsException
 from ag.settings import logging
 
 
@@ -20,6 +24,32 @@ class Thirst(Component):
 
     defaults = dict([('current', 100), ('max', 100)])
     scale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
+
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+
+        e.__setattr__('do_drink', self.do_drink)
+
+    def do_drink(self, item: Entity):
+        if 'drinkable' not in item.components:
+            raise NoSuchComponentException('drinkable', item)
+        elif 'liquidcontainer' in item.components:
+            if item.get_filled() <= 0:
+                raise EmptyContainerException(item)
+            else:
+                item.do_empty()
+
+        self.remove_thirst()
+        return True
+
+
+    @staticmethod
+    def is_drinkable(item):
+        return 'drinkable' in item.components
+
+    def remove_thirst(self) -> None:
+        self.entity.thirst.current = self.entity.thirst.max
+        self.entity.conditions.pop('thirsty', None)
 
     @property
     def status(self) -> str:
@@ -59,7 +89,7 @@ class Health(Component):
 
     def change(self, value):
         if self.alive:
-            self.current = max(self.current + value, self.min)
+            self.current = min(max(self.current + value, self.min), self.max)
 
     @property
     def alive(self) -> bool:
@@ -75,6 +105,14 @@ class Geo(Component):
         self.area = area
         e.__setattr__('area', self.area)
         e.__setattr__('pos', self.pos)
+        e.__setattr__('x', self.x)
+        e.__setattr__('y', self.y)
+
+    def x(self) -> int:
+        return self.pos[0]
+
+    def y(self) -> int:
+        return self.pos[1]
 
 
 class Mov(Component):
@@ -133,7 +171,61 @@ class Terrain(Component):
     defaults = dict([('type', 'island')])
 
 
-class Inv(Component):
+class ContainerStatus(Enum):
+    full = 0
+    empty = 1
+    part = 2
+
+
+class Container(Component):
+
+    def __init__(self, e: Entity, *args, capacity=100, content=[], filled=0, **kwargs) -> None:
+        super().__init__(e, *args, **kwargs)
+        self.status = ContainerStatus.empty
+        self.capacity = capacity
+        self.content = content
+        self.filled = filled
+        e.__setattr__('capacity', self.capacity)
+        e.__setattr__('content', self.content)
+        e.__setattr__('get_status', self.get_status)
+        e.__setattr__('get_filled', self.get_filled)
+        e.__setattr__('is_full', self.is_full)
+        e.__setattr__('is_empty', self.is_empty)
+        e.__setattr__('do_empty', self.do_empty)
+
+
+    @property
+    def space_left(self):
+        return self.capacity - self.filled
+
+    def get_status(self):
+        return self.status
+
+    def get_filled(self) -> int:
+        return self.filled
+
+    def is_empty(self) -> bool:
+        return self.status == ContainerStatus.empty
+
+    def is_full(self) -> bool:
+        return self.status == ContainerStatus.full
+
+    def do_empty(self) -> None:
+        self.filled = 0
+        self.update_status()
+
+    def update_status(self) -> None:
+        if self.filled <= 0:
+            self.status = ContainerStatus.empty
+        elif self.filled == self.capacity:
+            self.status = ContainerStatus.full
+        else:
+            self.status = ContainerStatus.part
+
+        self.entity.status = self.status
+        self.entity.filled = self.filled
+
+class Inv(Container):
 
     defaults = dict([('capacity', 100), ('content', []), ('filled', 0)])
 
@@ -145,13 +237,6 @@ class Inv(Component):
     @property
     def owner(self):
         return self.entity
-    @property
-    def space_left(self):
-        return self.capacity - self.filled
-
-    @property
-    def full(self):
-        return self.capacity <= 0
 
     def add(self, item: Entity):
 
@@ -204,52 +289,58 @@ class Inv(Component):
         return str(self.content)
 
 
-class Liquidcontainer(Component):
+class Liquidcontainer(Container):
 
-    defaults = dict([('capacity', 100), ('content', []), ('filled', 0), ('unit', 'litre')])
+    defaults = dict([('capacity', 100), ('content', None), ('filled', 0), ('unit', 'litre')])
 
     def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
-        e.__setattr__('filled', self.filled)
+        e.__setattr__('fill', self.fill)
 
-    @property
-    def space_left(self):
-        return self.capacity - self.filled
-    def fill(self, liquid):
-        if not self.empty:
-            if self.content.type != liquid.type:
-                logging.error("Can't add {} to a container filled with {}"
-                              .format(liquid.type, self.content.type))
-                return False
-        else:
-            self.filled += liquid.volume
-            if self.space_left < 0:
-                self.filled = self.capacity
-                self.content.volume = self.capacity
-            return True
+    def fill(self, content: Entity, volume=None):
+        if 'liquid' not in content.components:
+            raise NoSuchComponentException('liquid', content)
+        elif self.is_empty():
+            self.content = content
+        elif self.content.name != content.name:
+            raise MixedLiquidsException(self, content)
+
+            return False
+
+        self.filled += volume or self.capacity
+        self.update_status()
 
     def pour(self, volume: int, recipient: Entity):
         self.filled -= volume
         liquid = Liquid(self.content.type)
-        recipient.receive(liquid) # todo drink action with Character drinking Liquid from Liquidcontainer
+        recipient.receive(liquid)  # todo drink action with Character drinking Liquid from Liquidcontainer
+        self.update_status()
 
 
 class Liquid(Component):
 
-    def __init__(self, e: Entity, type: str, *args, **kwargs) -> None:
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
-        self.type = type
 
 
 class Drinkable(Liquid):
 
-    def __init__(self, e: Entity, type: str, *args, **kwargs) -> None:
+    def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
     # TODO add attr drink to 'liquidcontainer' entity if possible
+
 
 class Climate(Component):
 
     defaults = dict([('type', 'tropical')])
+
+
+class Needs(Component):
+    """
+        Helps give priority order to entity
+    """
+    # list of needs with a priority order
+    defaults = dict([('breathe', 'drink')])
 
 
 class Carriable(Component):

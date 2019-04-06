@@ -1,6 +1,9 @@
 import pytest
+
+from ag.ECS import System
 from ag.factory import Factory
-from ag.systems import *
+from ag.systems.biological_needs import BiologicalNeedsSystem
+from ag.systems.world import WorldSystem
 
 
 class TestSystems(object):
@@ -17,11 +20,13 @@ class TestSystems(object):
     def test_systems_catalog_updates(self):
 
         b = BiologicalNeedsSystem()
-        w = WorldSystem()
+        w = WorldSystem('world')
+
+        system = System('new_system')
 
         assert b != w
         assert len(b.Catalog) == len(w.Catalog)
 
-        assert 'tests' in b.Catalog
-        assert 'world' in b.Catalog
+        assert system.name in b.Catalog
+        assert w.name in b.Catalog
 

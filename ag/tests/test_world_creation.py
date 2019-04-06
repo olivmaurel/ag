@@ -1,8 +1,10 @@
 import pytest
-from ag.ECS import Entity
+
+from ag.ECS import System
 from ag.factory import Factory
-from ag.components import *
 from ag.systems import *
+from ag.systems.biological_needs import BiologicalNeedsSystem
+from ag.systems.world import WorldSystem
 
 
 class TestWorldCreation(object):
@@ -40,7 +42,6 @@ class TestWorldCreation(object):
                 return True
         else:
             return False
-
 
     def test_set_active_area(self, factory, island, world):
 

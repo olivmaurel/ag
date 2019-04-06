@@ -60,6 +60,12 @@ class TestEntities(object):
 
         first = factory.entity_creation('e', components=[{'geo': {'pos': (0, 1)}}])
         second = factory.entity_creation('e', components=['Health'])
-
         assert 'position' not in second.components
         assert 'health' in first.components
+
+    def test_linked_entity_is_same_as_self(self, factory):
+
+        e = factory.entity_creation('e', components=[{'geo': {'pos': (0, 1)}}])
+        assert e == e.geo.entity
+        assert e.pos is not False
+

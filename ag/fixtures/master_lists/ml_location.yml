@@ -8,8 +8,13 @@ beach:
     - seashells
     - fish
     - sand
+    - salt
 
-woods:
+coast:
+  gives:
+    - salt
+
+forest:
   gives:
     - mushrooms
     - wood

@@ -3,7 +3,7 @@ water:
   type: liquid
   traits:
     - liquid
-    - drink
+    - drinkable
   weight: 1
   unit: litre
 oil:

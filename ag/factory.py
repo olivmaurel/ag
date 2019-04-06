@@ -1,9 +1,10 @@
 from collections import OrderedDict
 from ag.ECS import Entity
 import ag.components
-from ag.systems import WorldSystem
 from typing import Any, Union, Tuple, List
 from uuid import uuid4
+
+from ag.systems.world import WorldSystem
 from core import get_yaml_as_dict
 
 
@@ -82,11 +83,15 @@ class Factory(object):
 
         return area
 
-    def item_creation(self, reftype: str, name: str, components: List = []) -> Entity:
+    def item_creation(self, reftype: str, name: str, components: List = [], **kwargs) -> Entity:
 
         components.append('geo')
 
-        return self.create_from_masterlist(reftype, name, components)
+        item = self.create_from_masterlist(reftype, name, components)
+
+        for key, value in kwargs.items():
+            item.__setattr__(key, value)
+        return item
 
     def create_from_masterlist(self, reftype: str, name: str, components: List = []):
 
@@ -94,6 +99,9 @@ class Factory(object):
             ml_ref = self.__getattr__('ml_{}'.format(reftype))[name]
         except AttributeError:
             ml_ref = self.__getattribute__('ml_{}'.format(reftype))[name]
+        if not ml_ref:
+            raise NotImplementedError('{} - {} is not in the master lists files.'.format(reftype, name))
+
         uid = uuid4()
         name = "{}-{}".format(name, uid)
 
@@ -122,7 +130,7 @@ class Factory(object):
         return world
 
     def world_map_creation(self, x_axis: int = 4, y_axis: int = 4) -> OrderedDict:
-        _map = OrderedDict()  # type: OrderedDict[Any,Any]
+        _map = OrderedDict()
         for x in range(x_axis):
             for y in range(y_axis):
                 uid = uuid4()

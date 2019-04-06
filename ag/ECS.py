@@ -228,7 +228,6 @@ class System(object):
         return system
 
     def __init__(self, name: str = None, components: list = []) -> None:
-
         self.name = self.__class__.__name__ if name is None else name
         if components:
             self.components = components

@@ -1,48 +1,8 @@
-from ag.ECS import System, Entity
 from collections import OrderedDict
+
+from ag.ECS import System, Entity
+from ag.systems.biological_needs import BiologicalNeedsSystem
 from typing import List, Tuple, Union
-
-
-class BiologicalNeedsSystem(System):
-
-    components = ['Hunger', 'Thirst']
-
-    def __init__(self, name="Biological system", components=[]):
-        super().__init__(name, components)
-
-    def update(self):
-
-        for e in self.entities:
-
-            if e.hunger:
-
-                if e.hunger.current >= 5:
-                    e.hunger.current -= 5
-                status = e.hunger.status
-                if status == 'famished':
-                    e.conditions['malnourished'] += 1
-                if status == 'starving':
-                    e.conditions['malnourished'] += 2
-                    if e.health:
-                        e.health.change(-10)
-            if e.thirst:
-                if e.thirst.current >= 5:
-                    e.thirst.current -= 5
-                status = e.thirst.status
-                if status == 'dehydrated':
-                    e.conditions['dehydrated'] += 1
-                if status == 'parched':
-                    e.conditions['dehydrated'] += 2
-                    if e.health:
-                        e.health.change(-10)
-
-
-class GeoSystem(System):
-
-    components = ['geo']
-
-    def update(self):
-        raise NotImplementedError('Not implemented')
 
 
 class WorldSystem(System):
@@ -50,7 +10,7 @@ class WorldSystem(System):
     # components = ['Map']
     Active_area_default_systems = [BiologicalNeedsSystem]
 
-    def __init__(self, name='World', _map: OrderedDict = None, components: List = []):
+    def __init__(self, name='world', _map: OrderedDict = None, components: List = []):
 
         super().__init__(name, components)
         self.map = _map

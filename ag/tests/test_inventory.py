@@ -36,9 +36,9 @@ class TestInventory(object):
         e.pickup(bottle)
         e.moveto((1, 1))
 
-        assert bottle.pos == False
-        assert bottle.area == False
-        assert bottle.geo == False
+        assert bottle.pos is False
+        assert bottle.area is False
+        assert bottle.geo is False
 
     def test_cant_pickup_in_different_pos(self, e, factory):
 
@@ -63,5 +63,22 @@ class TestInventory(object):
         firstpouch = factory.item_creation('container', 'pouch')
         secondpouch = factory.item_creation('container', 'pouch')
 
-        assert isinstance (firstpouch, Entity)
+        assert isinstance(firstpouch, Entity)
+        assert isinstance(secondpouch, Entity)
         assert firstpouch != secondpouch
+
+    def test_fill_one_the_other_is_empty(self, factory):
+
+        firstpouch = factory.item_creation('container', 'pouch')
+        secondpouch = factory.item_creation('container', 'pouch')
+        water = factory.item_creation('liquid', 'water')
+        firstpouch.fill(water)
+
+        assert firstpouch.liquidcontainer.full
+        assert firstpouch.full
+        assert firstpouch.status == ContainerStatus.full
+
+        assert secondpouch.empty
+        assert secondpouch.liquidcontainer.empty
+        assert secondpouch.status == ContainerStatus.empty
+
