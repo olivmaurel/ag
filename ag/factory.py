@@ -61,10 +61,17 @@ class Factory(object):
 
         return self.entity_creation(e, components)
 
-    def area_creation(self, name: Union[uuid4, str], pos: Tuple[int, int], terrain: str, climate: str, components: list = [],
-                      uid: uuid4() = None, map_dimensions: Tuple[int, int] = (10, 10)) -> Entity:
+    def area_creation(self,
+                      name: Union[uuid4, str],
+                      pos: Tuple[int, int],
+                      terrain: str,
+                      climate: str,
+                      components: list = None,
+                      uid: uuid4() = None,
+                      map_dimensions: Tuple[int, int] = (10, 10)) -> Entity:
 
         name = ('<{} {}:{}/{}>'.format(name, pos, terrain, climate))
+        components = components or []
         components.extend(['updater',
                            {'terrain': [terrain]},
                            {'climate': [climate]}])
@@ -146,3 +153,46 @@ class Factory(object):
                 _map[(x, y)] = area
 
         return _map
+
+
+class RecipeBook(object):
+
+    _factory = Factory()
+
+    @property
+    def factory(self):
+        return self._factory
+
+    def entity(self, name: str = '', components: List = None, uid: uuid4() = None):
+        return self.factory.entity_creation(name, components, uid)
+
+    def human(self, name: str = '', uid: uuid4() = None):
+        return self.factory.human_creation(name, uid)
+
+    def liquid(self, name: str, components: List = None):
+        return self.factory.item_creation('liquid', name, components)
+
+    def container(self, name: str, components: List = None):
+        return self.factory.item_creation('container', name, components)
+
+    def area(self, name: Union[uuid4, str],
+             pos: Tuple[int, int],
+             terrain: str,
+             climate: str,
+             components: list = None,
+             uid: uuid4() = None,
+             map_dimensions: Tuple[int, int] = (10, 10)):
+        return self.factory.area_creation(name, pos, terrain, climate, components, uid, map_dimensions)
+
+    def location(self, name: str, pos: Tuple[int, int], area: Entity, components: List=None):
+        return self.factory.location_creation(name, pos, area, components)
+
+    def world(self, name: str):
+        return self.factory.world_system_creation(name)
+
+    def attach(self, entity: Entity, to_attach: Union[str,List], *args, **kwargs):
+
+        if isinstance(to_attach, str):
+            return self.factory.assign_component(entity, to_attach, args, kwargs)
+        else:
+            return self.factory.assign_components(entity, to_attach)

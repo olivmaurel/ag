@@ -1,7 +1,7 @@
 import pytest
 
 from ag.ECS import System
-from ag.factory import Factory
+from ag.factory import RecipeBook
 from ag.systems.biological_needs import BiologicalNeedsSystem
 from ag.systems.world import WorldSystem
 
@@ -9,8 +9,8 @@ from ag.systems.world import WorldSystem
 class TestSystems(object):
 
     @pytest.fixture
-    def factory(self):
-        return Factory()
+    def recipe(self):
+        return RecipeBook()
 
     def test_create_system(self):
 

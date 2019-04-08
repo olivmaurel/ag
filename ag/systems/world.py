@@ -10,8 +10,8 @@ class WorldSystem(System):
     # components = ['Map']
     Active_area_default_systems = [BiologicalNeedsSystem]
 
-    def __init__(self, name='world', _map: OrderedDict = None, components: List = []):
-
+    def __init__(self, name='world', _map: OrderedDict = None, components: List = None):
+        components = components or []
         super().__init__(name, components)
         self.map = _map
         self.active_position = None

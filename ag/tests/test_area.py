@@ -1,45 +1,45 @@
 import pytest
-from ag.factory import Factory
+from ag.factory import RecipeBook
 from ag.components import *
 
 
 class TestArea(object):
 
     @pytest.fixture
-    def factory(self):
-        return Factory()
+    def recipe(self):
+        return RecipeBook()
 
     @pytest.fixture
     def entity(self):
         return Entity('e')
 
     @pytest.fixture
-    def plains(self, factory):
+    def plains(self, recipe):
 
-        return factory.area_creation(pos=(4, 2),
+        return recipe.area(pos=(4, 2),
                                      name="Some plains",
                                      terrain='plains',
                                      climate='continental')
     @pytest.fixture
-    def island(self, factory):
+    def island(self, recipe):
 
-        return factory.area_creation(pos=(1, 2),
+        return recipe.area(pos=(1, 2),
                                        name="Nice Island",
                                        terrain='island',
                                        climate='tropical')
     @pytest.fixture
-    def location(self, factory):
+    def location(self, recipe):
 
-        return factory.location_creation('river', (1, 2))
+        return recipe.location('river', (1, 2))
 
     @pytest.fixture
-    def world(self, factory):
+    def world(self, recipe):
 
-        return factory.world_system_creation('world')
+        return recipe.world('world')
 
-    def test_create_area(self, factory):
+    def test_create_area(self, recipe):
 
-        island = factory.area_creation(pos=(1, 2),
+        island = recipe.area(pos=(1, 2),
                                        name="Nice Island",
                                        terrain='island',
                                        climate='tropical')
@@ -50,26 +50,26 @@ class TestArea(object):
     def test_basic(self):
         assert 2 == 2
 
-    def test_assign_area_to_entity(self, factory, entity, plains):
+    def test_assign_area_to_entity(self, recipe, entity, plains):
 
-        factory.assign_component(entity, 'geo')
-        factory.assign_component(entity, 'mov')
+        recipe.attach(entity, 'geo')
+        recipe.attach(entity, 'mov')
         assert entity.geo.pos == (0, 0)
         entity.enter_area(plains, (0, 0))
 
-    def test_geo(self, factory, entity, plains):
+    def test_geo(self, recipe, entity, plains):
 
-        factory.assign_component(entity, 'geo')
-        factory.assign_component(entity, 'mov')
+        recipe.attach(entity, 'geo')
+        recipe.attach(entity, 'mov')
         entity.enter_area(plains, (0, 0))
         assert entity.area == plains
         assert entity.area.pos == (4, 2)
         assert entity in plains.map[(0, 0)].entities
 
-    def test_location_creation(self, factory, plains):
+    def test_location_creation(self, recipe, plains):
 
-        river = factory.location_creation('river', (1, 1), plains)
+        river = recipe.location('river', (1, 1), plains)
         assert plains.map[(1, 1)] == river
 
-    def test_active_area_and_inactive_area_update(self, factory, world, plains, island):
+    def test_active_area_and_inactive_area_update(self, recipe, world, plains, island):
         pass

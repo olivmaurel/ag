@@ -1,37 +1,37 @@
 import pytest
-from ag.factory import Factory
+from ag.factory import RecipeBook
 from ag.components import *
 
 
 class TestComponents(object):
 
     @pytest.fixture
-    def factory(self):
-        return Factory()
+    def recipe(self):
+        return RecipeBook()
 
     @pytest.fixture
-    def e(self):
+    def entity(self):
         return Entity('e')
 
-    def test_component_becomes_attr(self, factory, e):
+    def test_component_becomes_attr(self, recipe, entity):
 
-        factory.assign_component(e, 'health')
-        assert hasattr(e, 'health')
-        assert e.health.entity == e
+        recipe.attach(entity, 'health')
+        assert hasattr(entity, 'health')
+        assert entity.health.entity == entity
 
-    def test_component_becomes_attr_no_factory(self, e):
+    def test_component_becomes_attr_no_factory(self, entity):
 
-        e.health = Health(e)
-        assert hasattr(e, 'health')
-        assert e.health.entity == e
+        entity.health = Health(entity)
+        assert hasattr(entity, 'health')
+        assert entity.health.entity == entity
 
-    def test_position(self, factory, e):
+    def test_position(self, recipe, entity):
 
-        factory.assign_component(e, 'geo', pos=(0, 0))
-        assert e.geo.entity == e
-        assert e.pos == (0, 0)
+        recipe.attach(entity, 'geo', pos=(0, 0))
+        assert entity.geo.entity == entity
+        assert entity.pos == (0, 0)
 
-    def test_container_custom_units(self, factory):
+    def test_container_custom_units(self, recipe):
 
-        e = factory.entity_creation('e', components=[{'liquidcontainer': {'unit': 'litre', 'size': 5}}])
+        e = recipe.entity('e', components=[{'liquidcontainer': {'unit': 'litre', 'size': 5}}])
         assert e.liquidcontainer.unit == 'litre'
