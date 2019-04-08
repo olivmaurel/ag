@@ -30,7 +30,7 @@ class TestArea(object):
     @pytest.fixture
     def location(self, factory):
 
-        return factory.location_creation('river'(1, 2))
+        return factory.location_creation('river', (1, 2))
 
     @pytest.fixture
     def world(self, factory):

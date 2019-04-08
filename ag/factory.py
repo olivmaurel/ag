@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from ag.ECS import Entity
 import ag.components
-from typing import Any, Union, Tuple, List
+from typing import Union, Tuple, List
 from uuid import uuid4
 
 from ag.systems.world import WorldSystem
@@ -44,11 +44,11 @@ class Factory(object):
         if components:
             for component in components:
                 if isinstance(component, dict):
-                    for k, v, in component.items():
-                        if isinstance(v, dict):
-                            self.assign_component(entity, k, **v)
+                    for key, value, in component.items():
+                        if isinstance(value, dict):
+                            self.assign_component(entity, key, **value)
                         else:
-                            self.assign_component(entity, k, *v)
+                            self.assign_component(entity, key, *value)
                 else:
                     self.assign_component(entity, component)
 
@@ -61,7 +61,7 @@ class Factory(object):
 
         return self.entity_creation(e, components)
 
-    def area_creation(self, name: str, pos: Tuple[int, int], terrain: str, climate: str, components: list = [],
+    def area_creation(self, name: Union[uuid4, str], pos: Tuple[int, int], terrain: str, climate: str, components: list = [],
                       uid: uuid4() = None, map_dimensions: Tuple[int, int] = (10, 10)) -> Entity:
 
         name = ('<{} {}:{}/{}>'.format(name, pos, terrain, climate))
@@ -71,7 +71,7 @@ class Factory(object):
         area = self.entity_creation(name, components, uid)
         area.__setattr__('pos', pos if isinstance(pos, tuple) else None)
         area.__setattr__('systems', [])
-        area.__setattr__('map', {})
+        area.__setattr__('map', OrderedDict())
 
         for x in range(map_dimensions[0]):
             for y in range(map_dimensions[1]):
@@ -83,8 +83,9 @@ class Factory(object):
 
         return area
 
-    def item_creation(self, reftype: str, name: str, components: List = [], **kwargs) -> Entity:
+    def item_creation(self, reftype: str, name: str, components: List = None, **kwargs) -> Entity:
 
+        components = components or []
         components.append('geo')
 
         item = self.create_from_masterlist(reftype, name, components)
@@ -93,7 +94,7 @@ class Factory(object):
             item.__setattr__(key, value)
         return item
 
-    def create_from_masterlist(self, reftype: str, name: str, components: List = []):
+    def create_from_masterlist(self, reftype: str, name: str, components: List = None):
 
         try:
             ml_ref = self.__getattr__('ml_{}'.format(reftype))[name]
@@ -104,6 +105,7 @@ class Factory(object):
 
         uid = uuid4()
         name = "{}-{}".format(name, uid)
+        components = components or []
 
         if 'traits' in ml_ref:
             components.extend(ml_ref['traits'])
@@ -116,8 +118,9 @@ class Factory(object):
 
         return entity
 
-    def location_creation(self, name: str, pos: Tuple[int, int], area: Entity, components: List = []):
+    def location_creation(self, name: str, pos: Tuple[int, int], area: Entity, components: List = None):
 
+        components = components or []
         location = self.create_from_masterlist('location', name, components)
         area.map[pos] = location
         return location

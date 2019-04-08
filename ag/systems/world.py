@@ -21,7 +21,6 @@ class WorldSystem(System):
         return self.map[self.active_position]
 
     def update(self):
-
         self.active_area.update()
         self.update_inactive_areas()
 

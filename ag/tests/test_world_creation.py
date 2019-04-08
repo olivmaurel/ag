@@ -2,7 +2,6 @@ import pytest
 
 from ag.ECS import System
 from ag.factory import Factory
-from ag.systems import *
 from ag.systems.biological_needs import BiologicalNeedsSystem
 from ag.systems.world import WorldSystem
 

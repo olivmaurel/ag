@@ -2,10 +2,9 @@ import pytest
 
 from ag.exceptions.exceptions import *
 from ag.factory import Factory
-from ag.systems import *
 
 
-class TestNeeds(object):
+class TestLiquids(object):
 
     @pytest.fixture
     def factory(self):
@@ -15,9 +14,9 @@ class TestNeeds(object):
     def island(self, factory):
 
         return factory.area_creation(pos=(1, 2),
-                                       name='Skull Island',
-                                       terrain='island',
-                                       climate='tropical')
+                                     name='Skull Island',
+                                     terrain='island',
+                                     climate='tropical')
 
     @pytest.fixture
     def world(self, factory):
@@ -38,7 +37,8 @@ class TestNeeds(object):
 
         return human
 
-    def get_bottle_and_drink(self, character, bottle):
+    @staticmethod
+    def get_bottle_and_drink(character, bottle):
 
         character.moveto(bottle.pos)
         character.pickup(bottle)
@@ -47,6 +47,7 @@ class TestNeeds(object):
     def test_human_gets_thirsty(self, world, island, human):
 
         world.set_active_area(island)
+        human.enter_area(island, pos=(1, 1))
 
         for i in range(10):
             world.update()
@@ -108,16 +109,16 @@ class TestNeeds(object):
         assert 'thirsty' in human.conditions
         assert bottle.is_empty()
 
-        with pytest.raises(NoSuchComponentException):
+        with pytest.raises(EmptyContainerException):
             self.get_bottle_and_drink(human, bottle)
 
         assert 'thirsty' in human.conditions
 
-    def test_drink_oil_still_thirsty(self, world, island, human, factory, oil):
+    def test_drink_oil_still_thirsty(self, world, island, human, factory):
 
         world.set_active_area(island)
         bottle = factory.item_creation('container', 'bottle', area=island, pos=(1, 2))
-
+        oil = factory.item_creation('liquid', 'oil', area=island, pos=(1, 2))
         for i in range(10):
             world.update()
 
@@ -126,10 +127,12 @@ class TestNeeds(object):
 
         bottle.fill(oil)
 
-        with pytest.raises(NoSuchComponentException):
+        with pytest.raises(NoSuchPropertyException):
             self.get_bottle_and_drink(human, bottle)
 
         assert 'thirsty' in human.conditions
+        assert bottle.empty is False
+
 
     def test_fill_water_then_oil(self, factory, world, island, human, oil, water):
 

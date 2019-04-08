@@ -69,3 +69,13 @@ class TestEntities(object):
         assert e == e.geo.entity
         assert e.pos is not False
 
+    def test_entity_with_components_inherits_shared_functions(self, factory):
+
+        bottle = factory.item_creation('container', 'bottle')
+        water = factory.item_creation('liquid', 'water')
+        bottle.fill(water)
+
+        # content is in the properties, water has been added to the component
+        # the test fails if the entity properties are not synced with the component's
+        liquid = bottle.content
+        assert liquid.drinkable

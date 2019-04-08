@@ -74,11 +74,11 @@ class TestInventory(object):
         water = factory.item_creation('liquid', 'water')
         firstpouch.fill(water)
 
-        assert firstpouch.liquidcontainer.full
-        assert firstpouch.full
-        assert firstpouch.status == ContainerStatus.full
+        assert firstpouch.is_full()
+        assert firstpouch.liquidcontainer.is_full()
+        assert firstpouch.get_status() == ContainerStatus.full
 
-        assert secondpouch.empty
-        assert secondpouch.liquidcontainer.empty
-        assert secondpouch.status == ContainerStatus.empty
+        assert secondpouch.is_empty()
+        assert secondpouch.liquidcontainer.is_empty()
+        assert secondpouch.get_status() == ContainerStatus.empty
 

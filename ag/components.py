@@ -2,10 +2,10 @@ import math
 from collections import OrderedDict as dict
 from enum import Enum
 
-from ag.ECS import Component, Entity
+from ag.ECS import Component
 from typing import Tuple
 
-from ag.exceptions.exceptions import EmptyContainerException, NoSuchComponentException, MixedLiquidsException
+from ag.exceptions.exceptions import *
 from ag.settings import logging
 
 
@@ -31,13 +31,20 @@ class Thirst(Component):
         e.__setattr__('do_drink', self.do_drink)
 
     def do_drink(self, item: Entity):
-        if 'drinkable' not in item.components:
-            raise NoSuchComponentException('drinkable', item)
-        elif 'liquidcontainer' in item.components:
+
+        is_container = False
+        if 'liquidcontainer' in item.components:
             if item.get_filled() <= 0:
                 raise EmptyContainerException(item)
-            else:
-                item.do_empty()
+            liquid = item.content
+            is_container = True
+        else:
+            liquid = item
+        if not liquid.drinkable:
+            raise NoSuchPropertyException('drinkable', liquid)
+
+        if is_container:
+            item.do_empty()
 
         self.remove_thirst()
         return True
@@ -108,9 +115,11 @@ class Geo(Component):
         e.__setattr__('x', self.x)
         e.__setattr__('y', self.y)
 
+    @property
     def x(self) -> int:
         return self.pos[0]
 
+    @property
     def y(self) -> int:
         return self.pos[1]
 
@@ -179,14 +188,17 @@ class ContainerStatus(Enum):
 
 class Container(Component):
 
-    def __init__(self, e: Entity, *args, capacity=100, content=[], filled=0, **kwargs) -> None:
-        super().__init__(e, *args, **kwargs)
+    def __init__(self, e: Entity, *args, capacity=100, filled=0, size=1, **kwargs) -> None:
         self.status = ContainerStatus.empty
         self.capacity = capacity
-        self.content = content
         self.filled = filled
+        self.size = size
+        self.content = []
+        super().__init__(e, *args, **kwargs)
+
         e.__setattr__('capacity', self.capacity)
         e.__setattr__('content', self.content)
+        e.__setattr__('size', self.size)
         e.__setattr__('get_status', self.get_status)
         e.__setattr__('get_filled', self.get_filled)
         e.__setattr__('is_full', self.is_full)
@@ -217,6 +229,7 @@ class Container(Component):
     def update_status(self) -> None:
         if self.filled <= 0:
             self.status = ContainerStatus.empty
+            self.content = []
         elif self.filled == self.capacity:
             self.status = ContainerStatus.full
         else:
@@ -224,6 +237,8 @@ class Container(Component):
 
         self.entity.status = self.status
         self.entity.filled = self.filled
+        self.entity.content = self.content
+
 
 class Inv(Container):
 
@@ -233,6 +248,7 @@ class Inv(Container):
         super().__init__(e, *args, **kwargs)
         e.__setattr__('pickup', self.pickup)
         e.__setattr__('drop', self.drop)
+
 
     @property
     def owner(self):
@@ -291,21 +307,34 @@ class Inv(Container):
 
 class Liquidcontainer(Container):
 
-    defaults = dict([('capacity', 100), ('content', None), ('filled', 0), ('unit', 'litre')])
+    defaults = dict([('capacity', 100), ('filled', 0), ('unit', 'litre')])
 
     def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         e.__setattr__('fill', self.fill)
 
-    def fill(self, content: Entity, volume=None):
-        if 'liquid' not in content.components:
-            raise NoSuchComponentException('liquid', content)
-        elif self.is_empty():
-            self.content = content
-        elif self.content.name != content.name:
-            raise MixedLiquidsException(self, content)
+    @property  # only one content per liquid container
+    def content(self):
+        try:
+            return self.__content[0]
+        except IndexError:
+            return self.__content
 
-            return False
+    @content.setter
+    def content(self, value):
+        if isinstance(value, list):
+            self.__content = value
+        else:
+            self.__content.clear()
+            self.__content.append(value)
+
+    def fill(self, liquid: Entity, volume=None):
+        if 'liquid' not in liquid.components.keys():
+            raise NoSuchComponentException('liquid', liquid)
+        elif self.is_empty():
+            self.content = liquid
+        elif self.content.name != liquid.name:
+            raise MixedLiquidsException(self, liquid)
 
         self.filled += volume or self.capacity
         self.update_status()
@@ -355,7 +384,7 @@ class Carriable(Component):
     def carriedby(self, e: Entity):
         self.carrier = e
         self.entity.carrier = e
-        if self.entity.geo != False:
+        if self.entity.geo:
             self.entity.__delattr__('area')
             self.entity.__delattr__('pos')
             del self.entity.components['geo']
