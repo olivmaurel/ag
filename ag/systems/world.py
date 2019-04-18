@@ -1,14 +1,14 @@
 from collections import OrderedDict
 
 from ag.ECS import System, Entity
-from ag.systems.biological_needs import BiologicalNeedsSystem
+from ag.systems.needs import NeedsSystem
 from typing import List, Tuple, Union
 
 
 class WorldSystem(System):
 
     # components = ['Map']
-    Active_area_default_systems = [BiologicalNeedsSystem]
+    Active_area_default_systems = [NeedsSystem]
 
     def __init__(self, name='world', _map: OrderedDict = None, components: List = None):
         components = components or []

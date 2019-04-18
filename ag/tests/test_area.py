@@ -1,41 +1,7 @@
-import pytest
-from ag.factory import RecipeBook
-from ag.components import *
+from ag.tests.base_tests import BaseTest
 
 
-class TestArea(object):
-
-    @pytest.fixture
-    def recipe(self):
-        return RecipeBook()
-
-    @pytest.fixture
-    def entity(self):
-        return Entity('e')
-
-    @pytest.fixture
-    def plains(self, recipe):
-
-        return recipe.area(pos=(4, 2),
-                                     name="Some plains",
-                                     terrain='plains',
-                                     climate='continental')
-    @pytest.fixture
-    def island(self, recipe):
-
-        return recipe.area(pos=(1, 2),
-                                       name="Nice Island",
-                                       terrain='island',
-                                       climate='tropical')
-    @pytest.fixture
-    def location(self, recipe):
-
-        return recipe.location('river', (1, 2))
-
-    @pytest.fixture
-    def world(self, recipe):
-
-        return recipe.world('world')
+class TestArea(BaseTest):
 
     def test_create_area(self, recipe):
 
@@ -46,9 +12,6 @@ class TestArea(object):
         assert island.terrain.type == 'island'
         assert "<Nice Island" in island.name
         assert island.climate.type == 'tropical'
-
-    def test_basic(self):
-        assert 2 == 2
 
     def test_assign_area_to_entity(self, recipe, entity, plains):
 

@@ -57,7 +57,7 @@ class Factory(object):
     def human_creation(self, name: str, uid: str = None):
 
         e = Entity(name, uid)
-        components = ['health', 'hunger', 'geo', 'thirst', 'mov', 'inv']
+        components = ['health', 'hunger', 'geo', 'thirst', 'mov', 'inv', 'decision']
 
         return self.entity_creation(e, components)
 
@@ -169,11 +169,11 @@ class RecipeBook(object):
     def human(self, name: str = '', uid: uuid4() = None):
         return self.factory.human_creation(name, uid)
 
-    def liquid(self, name: str, components: List = None):
-        return self.factory.item_creation('liquid', name, components)
+    def liquid(self, name: str, components: List = None, **kwargs):
+        return self.factory.item_creation('liquid', name, components, **kwargs)
 
-    def container(self, name: str, components: List = None):
-        return self.factory.item_creation('container', name, components)
+    def container(self, name: str, components: List = None, **kwargs):
+        return self.factory.item_creation('container', name, components, **kwargs)
 
     def area(self, name: Union[uuid4, str],
              pos: Tuple[int, int],

@@ -1,13 +1,10 @@
 import pytest
 
-from ag.factory import RecipeBook
 from ag.components import *
+from ag.tests.base_tests import BaseTest
 
-class TestInventory(object):
 
-    @pytest.fixture
-    def recipe(self):
-        return RecipeBook()
+class TestInventory(BaseTest):
 
     @pytest.fixture
     def entity(self, recipe):

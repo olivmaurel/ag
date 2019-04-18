@@ -1,15 +1,11 @@
 import pytest
 import uuid
 
-from ag.factory import RecipeBook
 from ag.components import *
+from ag.tests.base_tests import BaseTest
 
 
-class TestEntities(object):
-
-    @pytest.fixture
-    def recipe(self):
-        return RecipeBook()
+class TestEntities(BaseTest):
 
     def test_basic_entity(self):
 

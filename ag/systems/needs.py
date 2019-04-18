@@ -1,7 +1,7 @@
 from ag.ECS import System
 
 
-class BiologicalNeedsSystem(System):
+class NeedsSystem(System):
 
     components = ['Hunger', 'Thirst']
 

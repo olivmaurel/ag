@@ -1,16 +1,10 @@
-import pytest
-
 from ag.ECS import System
-from ag.factory import RecipeBook
-from ag.systems.biological_needs import BiologicalNeedsSystem
+from ag.systems.needs import NeedsSystem
 from ag.systems.world import WorldSystem
+from ag.tests.base_tests import BaseTest
 
 
-class TestSystems(object):
-
-    @pytest.fixture
-    def recipe(self):
-        return RecipeBook()
+class TestSystems(BaseTest):
 
     def test_create_system(self):
 
@@ -19,7 +13,7 @@ class TestSystems(object):
 
     def test_systems_catalog_updates(self):
 
-        b = BiologicalNeedsSystem()
+        b = NeedsSystem()
         w = WorldSystem('world')
 
         system = System('new_system')

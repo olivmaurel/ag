@@ -33,3 +33,10 @@ class NoSuchPropertyException(Error):
     def __init__(self, prop: str, e: Entity):
         msg = "The property {} is missing from {} (uid:{})".format(prop, e.name, e.uid)
         Error.__init__(self, msg)
+
+
+class DifferentPositionException(Error):
+
+    def __init__(self, e: Entity, other: Entity):
+        msg = "The entities cannot interact, the positions are different on the map {} and {}".format(e.pos, other.pos)
+        Error.__init__(self, msg)

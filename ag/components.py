@@ -5,14 +5,29 @@ from enum import Enum
 from ag.ECS import Component
 from typing import Tuple
 
+from ag.constants import Conditions as C, Actions
 from ag.exceptions.exceptions import *
 from ag.settings import logging
 
 
 class Hunger(Component):
 
-    defaults = dict([('current', 100), ('max', 100)])
     scale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
+
+    def __init__(self, e: Entity, *args, current: int = 100, max: int = 100, min: int = 0, **kwargs) -> None:
+        self.current = current
+        self.max = max
+        self.min = min
+        super().__init__(e, *args, **kwargs)
+
+    def do_eat(self, item: Entity):
+
+        if not self.same_position(item):
+            logging.error('{}({}) is not located in {}, impossible to drink it {}'
+                          .format(self.entity.name, self.entity.pos, item.pos, item.name))
+            return False
+
+        raise NotImplementedError('Add this component : hunger')
 
     @property
     def status(self) -> str:
@@ -22,15 +37,20 @@ class Hunger(Component):
 
 class Thirst(Component):
 
-    defaults = dict([('current', 100), ('max', 100)])
     scale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
 
-    def __init__(self, e: Entity, *args, **kwargs) -> None:
+    def __init__(self, e: Entity, *args, current: int = 100, max: int = 100, min: int = 0, **kwargs) -> None:
+        self.current = current
+        self.max = max
+        self.min = min
         super().__init__(e, *args, **kwargs)
 
         e.__setattr__('do_drink', self.do_drink)
 
     def do_drink(self, item: Entity):
+
+        if not self.same_position(item):
+            raise DifferentPositionException(self.entity, item)
 
         is_container = False
         if 'liquidcontainer' in item.components:
@@ -65,34 +85,14 @@ class Thirst(Component):
 
 
 class Health(Component):
-    '''Contains current and max value of health for an entity
 
-    >>> from ag.ECS import Entity
-    >>> player = Entity('player', 0)
-    >>> player
-    <Entity player:0>
-    >>> player.health = Health(player, current=80)
-    >>> player.health
-    <Health  entity:player.health>
-    >>> print (player.health)
-    {
-        "current": 80,
-        "max": 100
-    }
-    >>> print (player.health['current'])
-    80
-    >>> print (player.health.alive)
-    True
-    >>> player.health['current'] = 65
-    >>> print (player.health)
-    {
-        "current": 65,
-        "max": 100
-    }
-    >>> print (player.health.Catalog)
-    {<Entity player:0>: <Health  entity:player.health>}
-    '''
     defaults = dict([('current', 100), ('max', 100), ('min', 0)])
+
+    def __init__(self, e: Entity, *args, current=100, max = 100, min = 0, **kwargs) -> None:
+        self.current = current
+        self.max = max
+        self.min = min
+        super().__init__(e, *args, **kwargs)
 
     def change(self, value):
         if self.alive:
@@ -164,11 +164,12 @@ class Location(Component):
         e.__setattr__('entities', self.entities)
 
 
-class Per(Component):
+class Perception(Component):
 
     def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         e.__setattr__('locate', self.locate)
+        raise NotImplementedError('Implement this')
 
     def locate(self, something):
         pass
@@ -271,7 +272,7 @@ class Inv(Container):
 
     def pickup(self, item: Entity):
 
-        if self.entity.pos != item.pos:
+        if not self.same_position(item):
             logging.error('{}({}) is not located in {}, impossible to pickup {}'
                            .format(self.entity.name, self.entity.pos, item.pos, item.name))
             return False
@@ -329,6 +330,9 @@ class Liquidcontainer(Container):
             self.__content.append(value)
 
     def fill(self, liquid: Entity, volume=None):
+
+        if not self.same_position(liquid):
+            raise DifferentPositionException(self.entity, liquid)
         if 'liquid' not in liquid.components.keys():
             raise NoSuchComponentException('liquid', liquid)
         elif self.is_empty():
@@ -387,6 +391,8 @@ class Carriable(Component):
         if self.entity.geo:
             self.entity.__delattr__('area')
             self.entity.__delattr__('pos')
+            self.entity.__delattr__('x')
+            self.entity.__delattr__('y')
             del self.entity.components['geo']
 
     def dropped(self):
@@ -409,3 +415,31 @@ class Updater(Component):
     def update(self):
         for system in self.entity.systems:
             system.update()
+
+
+class Decision(Component):
+
+    def __init__(self, e: Entity, *args, **kwargs):
+        super().__init__(e, *args, **kwargs)
+
+        self.needs = []
+        self.hierarchy = dict() # Ordered dict !
+        self.hierarchy[C.suffocating] = Actions.breathe
+        self.hierarchy[C.thirsty] = Actions.drink
+        self.hierarchy[C.hungry] = Actions.eat
+
+        e.__setattr__('decide', self.decide)
+
+    def decide(self):
+        self.evaluate()
+        decision = next(iter(self.needs))
+        self.reset()
+        return decision
+
+    def evaluate(self):
+        for condition, action in self.hierarchy.items():
+            if condition in self.entity.conditions:
+                self.needs.append(action)
+
+    def reset(self):
+        self.needs = []

@@ -1,17 +1,9 @@
-import pytest
-from ag.factory import RecipeBook
+
 from ag.components import *
+from ag.tests.base_tests import BaseTest
 
 
-class TestComponents(object):
-
-    @pytest.fixture
-    def recipe(self):
-        return RecipeBook()
-
-    @pytest.fixture
-    def entity(self):
-        return Entity('e')
+class TestComponents(BaseTest):
 
     def test_component_becomes_attr(self, recipe, entity):
 
@@ -23,6 +15,7 @@ class TestComponents(object):
 
         entity.health = Health(entity)
         assert hasattr(entity, 'health')
+        assert entity.health.current == entity.health.max
         assert entity.health.entity == entity
 
     def test_position(self, recipe, entity):

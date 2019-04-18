@@ -162,6 +162,9 @@ class Component:
 
         return setattr(self, key, value)
 
+    def same_position(self, other):
+        return other.carrier == self.entity or self.entity.pos == other.pos
+
 
 class System(object):
 

@@ -1,28 +1,10 @@
-import pytest
-
 from ag.ECS import System
-from ag.factory import RecipeBook
-from ag.systems.biological_needs import BiologicalNeedsSystem
+from ag.systems.needs import NeedsSystem
 from ag.systems.world import WorldSystem
+from ag.tests.base_tests import BaseTest
 
 
-class TestWorldCreation(object):
-
-    @pytest.fixture
-    def recipe(self):
-        return RecipeBook()
-
-    @pytest.fixture
-    def island(self, recipe):
-
-        return recipe.area(pos=(1, 2),
-                           name='Skull Island',
-                           terrain='island',
-                           climate='tropical')
-
-    @pytest.fixture
-    def world(self, recipe):
-        return recipe.world('world')
+class TestWorldCreation(BaseTest):
 
     def test_create_world_no_args(self):
 
@@ -36,7 +18,7 @@ class TestWorldCreation(object):
         world.set_active_area(island)
 
         for system in world.active_area.systems:
-            if isinstance(system, BiologicalNeedsSystem):
+            if isinstance(system, NeedsSystem):
                 return True
         else:
             return False
