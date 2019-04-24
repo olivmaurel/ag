@@ -40,3 +40,10 @@ class DifferentPositionException(Error):
     def __init__(self, e: Entity, other: Entity):
         msg = "The entities cannot interact, the positions are different on the map {} and {}".format(e.pos, other.pos)
         Error.__init__(self, msg)
+
+
+class ActionNotFoundError(Error):
+
+    def __init__(self, action: str):
+        msg = "The action {} is not registered in the system".format(action)
+        Error.__init__(self, msg)

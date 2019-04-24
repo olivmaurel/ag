@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from ag.ECS import System, Entity
+from ag.systems.action import ActionSystem
 from ag.systems.needs import NeedsSystem
 from typing import List, Tuple, Union
 
@@ -15,6 +16,7 @@ class WorldSystem(System):
         super().__init__(name, components)
         self.map = _map
         self.active_position = None
+        self.action_system = ActionSystem()
 
     @property
     def active_area(self):
@@ -25,7 +27,7 @@ class WorldSystem(System):
         self.update_inactive_areas()
 
     def update_inactive_areas(self):
-        pass
+        raise NotImplementedError('update_inactive_areas')
         # for coord in self._map.items():
         #        if coord != self.active_area:
         #           coord.update()

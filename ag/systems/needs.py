@@ -5,7 +5,7 @@ class NeedsSystem(System):
 
     components = ['Hunger', 'Thirst']
 
-    def __init__(self, name="Biological system", components=None):
+    def __init__(self, name="Needs system", components=None):
         super().__init__(name, components)
 
     def update(self):
@@ -14,8 +14,6 @@ class NeedsSystem(System):
 
             self.hunger_tick(e)
             self.thirst_tick(e)
-
-
 
     @staticmethod
     def hunger_tick(entity):

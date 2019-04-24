@@ -11,7 +11,6 @@ from ag.settings import logging
 
 
 class Hunger(Component):
-
     scale = dict([(100, 'full'), (75, 'fed'), (50, 'hungry'), (25, 'famished'), (0, 'starving')])
 
     def __init__(self, e: Entity, *args, current: int = 100, max: int = 100, min: int = 0, **kwargs) -> None:
@@ -21,7 +20,6 @@ class Hunger(Component):
         super().__init__(e, *args, **kwargs)
 
     def do_eat(self, item: Entity):
-
         if not self.same_position(item):
             logging.error('{}({}) is not located in {}, impossible to drink it {}'
                           .format(self.entity.name, self.entity.pos, item.pos, item.name))
@@ -36,7 +34,6 @@ class Hunger(Component):
 
 
 class Thirst(Component):
-
     scale = dict([(100, 'fine'), (75, 'fine'), (50, 'thirsty'), (25, 'dehydrated'), (0, 'parched')])
 
     def __init__(self, e: Entity, *args, current: int = 100, max: int = 100, min: int = 0, **kwargs) -> None:
@@ -69,7 +66,6 @@ class Thirst(Component):
         self.remove_thirst()
         return True
 
-
     @staticmethod
     def is_drinkable(item):
         return 'drinkable' in item.components
@@ -85,10 +81,9 @@ class Thirst(Component):
 
 
 class Health(Component):
-
     defaults = dict([('current', 100), ('max', 100), ('min', 0)])
 
-    def __init__(self, e: Entity, *args, current=100, max = 100, min = 0, **kwargs) -> None:
+    def __init__(self, e: Entity, *args, current=100, max=100, min=0, **kwargs) -> None:
         self.current = current
         self.max = max
         self.min = min
@@ -104,7 +99,6 @@ class Health(Component):
 
 
 class Geo(Component):
-
     defaults = dict([('pos', (0, 0))])
 
     def __init__(self, e: Entity, area: Entity = None, *args, **kwargs) -> None:
@@ -177,7 +171,6 @@ class Perception(Component):
 
 
 class Terrain(Component):
-
     defaults = dict([('type', 'island')])
 
 
@@ -205,7 +198,6 @@ class Container(Component):
         e.__setattr__('is_full', self.is_full)
         e.__setattr__('is_empty', self.is_empty)
         e.__setattr__('do_empty', self.do_empty)
-
 
     @property
     def space_left(self):
@@ -242,14 +234,12 @@ class Container(Component):
 
 
 class Inv(Container):
-
     defaults = dict([('capacity', 100), ('content', []), ('filled', 0)])
 
     def __init__(self, e: Entity, *args, **kwargs) -> None:
         super().__init__(e, *args, **kwargs)
         e.__setattr__('pickup', self.pickup)
         e.__setattr__('drop', self.drop)
-
 
     @property
     def owner(self):
@@ -274,7 +264,7 @@ class Inv(Container):
 
         if not self.same_position(item):
             logging.error('{}({}) is not located in {}, impossible to pickup {}'
-                           .format(self.entity.name, self.entity.pos, item.pos, item.name))
+                          .format(self.entity.name, self.entity.pos, item.pos, item.name))
             return False
         elif not item.carriable:
             logging.error('{} cannot be picked up, it is not a carriable item'.format(item.name))
@@ -307,7 +297,6 @@ class Inv(Container):
 
 
 class Liquidcontainer(Container):
-
     defaults = dict([('capacity', 100), ('filled', 0), ('unit', 'litre')])
 
     def __init__(self, e: Entity, *args, **kwargs) -> None:
@@ -364,7 +353,6 @@ class Drinkable(Liquid):
 
 
 class Climate(Component):
-
     defaults = dict([('type', 'tropical')])
 
 
@@ -396,7 +384,6 @@ class Carriable(Component):
             del self.entity.components['geo']
 
     def dropped(self):
-
         self.entity.geo = Geo(self.entity)
         self.entity.area = self.entity.carrier.area
         self.entity.pos = self.entity.carrier.pos
@@ -423,12 +410,13 @@ class Decision(Component):
         super().__init__(e, *args, **kwargs)
 
         self.needs = []
-        self.hierarchy = dict() # Ordered dict !
+        self.hierarchy = dict()  # Ordered dict !
         self.hierarchy[C.suffocating] = Actions.breathe
         self.hierarchy[C.thirsty] = Actions.drink
         self.hierarchy[C.hungry] = Actions.eat
 
         e.__setattr__('decide', self.decide)
+        e.__setattr__('do', self.do)
 
     def decide(self):
         self.evaluate()
@@ -443,3 +431,25 @@ class Decision(Component):
 
     def reset(self):
         self.needs = []
+
+    def do(self, action=None):
+
+        if not action:
+            action = self.entity.decide()
+
+        return 'bla'
+
+# class Action(Component):
+#
+#     def __init__(self, e: Entity, *args, **kwargs):
+#         super().__init__(e, *args, **kwargs)
+#         e.__setattr__('do', self.do)
+#
+#         self.actions = dict()
+#
+#     def do(self, action=None):
+#
+#         if not action:
+#             action = self.entity.decide()
+#
+#         return 'bla'

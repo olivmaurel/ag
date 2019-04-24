@@ -25,7 +25,7 @@ class TestNeeds(BaseTest):
         human.do_drink(bottle)
         assert human.decide() == 'eat'
 
-    def test_human_moves_to_drink_when_thirsty(self, world, island, human, recipe):
+    def test_human_needs_to_drink_when_thirsty(self, world, island, recipe):
         world.set_active_area(island)
         human = recipe.human('human')
         human.enter_area(island, pos=(0, 2))
@@ -40,3 +40,21 @@ class TestNeeds(BaseTest):
         bottle = recipe.container('bottle', area=island, pos=(2, 2))
         bottle.fill(recipe.liquid('water', area=island, pos=(2, 2)))
         assert human.decide() == 'drink'
+
+    def test_human_needs_to_drink_simplified(self, world, island, recipe):
+
+        world.set_active_area(island)
+        human = recipe.human('human')
+        human.enter_area(island, pos=(0, 2))
+        human.conditions[C.thirsty] = True
+        assert human.decide() == 'drink'
+
+    def test_human_will_drink_when_thirsty(self, world, island, recipe):
+
+        world.set_active_area(island)
+        human = recipe.human('human')
+        human.enter_area(island, pos=(0, 2))
+        human.conditions[C.thirsty] = True
+        assert human.do() == 'drink'  # will execute a drink action
+        assert human.decide() == 'eat'
+
