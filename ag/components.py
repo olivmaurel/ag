@@ -438,18 +438,3 @@ class Decision(Component):
             action = self.entity.decide()
 
         return 'bla'
-
-# class Action(Component):
-#
-#     def __init__(self, e: Entity, *args, **kwargs):
-#         super().__init__(e, *args, **kwargs)
-#         e.__setattr__('do', self.do)
-#
-#         self.actions = dict()
-#
-#     def do(self, action=None):
-#
-#         if not action:
-#             action = self.entity.decide()
-#
-#         return 'bla'

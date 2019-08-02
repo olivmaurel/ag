@@ -49,6 +49,16 @@ class TestNeeds(BaseTest):
         human.conditions[C.thirsty] = True
         assert human.decide() == 'drink'
 
+    def test_human_needs_to_drink_doesnt_change_by_itself(self, world, island, recipe):
+
+        world.set_active_area(island)
+        human = recipe.human('human')
+        human.enter_area(island, pos=(0, 2))
+        human.conditions[C.thirsty] = True
+        assert human.decide() == 'drink'
+        assert human.decide() == 'drink'
+        assert human.decide() == 'drink'
+
     def test_human_will_drink_when_thirsty(self, world, island, recipe):
 
         world.set_active_area(island)

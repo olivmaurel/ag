@@ -7,7 +7,10 @@ class DrinkAction(Action):
 
     def execute(self):
         pass
-        # find a drink
+        # check inventory
+        # if liquid container in inventory
+        # take container
+        # if liquid is drinkable
         # do drink it
 
 
